@@ -1153,59 +1153,9 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
  
 
-<!-- SECRET MENU -->
+<!-- Settings moved to tab — secret menu removed -->
 
-<div class="secret-menu" id="secret-menu">
 
-<div class="secret-inner">
-
-<div class="secret-title">⚙ Secret Options</div>
-
-<div class="secret-toggle-row">
-
-<span class="secret-toggle-label">Streak Adjust Mode</span>
-
-<label class="toggle-switch">
-
-<input type="checkbox" id="streak-adjust-toggle" onchange="toggleStreakAdjust()">
-
-<span class="toggle-slider"></span>
-
-</label>
-
-</div>
-
-<div id="streak-adjust-panel" style="display: none; margin-bottom: 8px;">
-
-<div class="adj-streak-row" id="streak-adj-btns"><div class="adj-card"><div class="adj-name" style="color:#4a9ae0"><img src="data:image/webp;base64,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" width="13" height="13" style="border-radius:50%;object-fit:cover;display:block;flex-shrink:0"> Riley</div><div class="adj-btns"><button class="badj" onclick="adjStreak('Riley',-1)" style="width:24px;height:24px;font-size:13px">−</button><div class="wnum" style="font-size:14px;min-width:20px">0🔥</div><button class="badj" onclick="adjStreak('Riley',1)" style="width:24px;height:24px;font-size:13px">+</button></div></div><div class="adj-card"><div class="adj-name" style="color:#f5f5f5"><svg viewBox="0 0 24 24" width="14" height="14" style="display:block;flex-shrink:0"><circle cx="12" cy="12" r="11" fill="rgba(180,160,90,.15)"></circle><circle cx="12" cy="12" r="8" fill="none" stroke="#c8a840" stroke-width="1.2"></circle><circle cx="12" cy="12" r="4.5" fill="#d4b840"></circle><circle cx="12" cy="12" r="2.2" fill="#fff8d0"></circle><line x1="12" y1="1" x2="12" y2="3.5" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="12" y1="20.5" x2="12" y2="23" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="1" y1="12" x2="3.5" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="20.5" y1="12" x2="23" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line></svg> Sydney</div><div class="adj-btns"><button class="badj" onclick="adjStreak('Sydney',-1)" style="width:24px;height:24px;font-size:13px">−</button><div class="wnum" style="font-size:14px;min-width:20px">0🔥</div><button class="badj" onclick="adjStreak('Sydney',1)" style="width:24px;height:24px;font-size:13px">+</button></div></div><div class="adj-card"><div class="adj-name" style="color:#e05050"><svg viewBox="0 0 24 24" width="14" height="14" style="display:block;flex-shrink:0"><path d="M12 2.5 L3.5 21.5 L20.5 21.5Z" fill="#b82828"></path><path d="M12 2.5 L8 21.5 L16 21.5Z" fill="#e03030" opacity=".85"></path><path d="M12 2.5 L10.2 11 L12 14 L13.8 11Z" fill="#ff9060" opacity=".7"></path></svg> Mom</div><div class="adj-btns"><button class="badj" onclick="adjStreak('Mom',-1)" style="width:24px;height:24px;font-size:13px">−</button><div class="wnum" style="font-size:14px;min-width:20px">0🔥</div><button class="badj" onclick="adjStreak('Mom',1)" style="width:24px;height:24px;font-size:13px">+</button></div></div><div class="adj-card"><div class="adj-name" style="color:#50c060"><svg viewBox="0 0 24 24" width="14" height="14" style="display:block;flex-shrink:0"><path d="M12 22 C12 22 4 17.5 4 11 C4 5.5 7.5 2 12 2 C16.5 2 20 5.5 20 11 C20 17.5 12 22 12 22Z" fill="#228a32"></path><line x1="12" y1="22" x2="12" y2="11" stroke="#6ad060" stroke-width="1.8" stroke-linecap="round"></line><path d="M12 16 C12 16 8.5 14 7 11" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path><path d="M12 12.5 C12 12.5 15.5 10.5 17 7.5" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path></svg> Dad</div><div class="adj-btns"><button class="badj" onclick="adjStreak('Dad',-1)" style="width:24px;height:24px;font-size:13px">−</button><div class="wnum" style="font-size:14px;min-width:20px">0🔥</div><button class="badj" onclick="adjStreak('Dad',1)" style="width:24px;height:24px;font-size:13px">+</button></div></div></div>
-
-</div>
-
-<div id="secret-undo-preview" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2);margin-bottom:8px;min-height:16px;letter-spacing:.03em">Nothing to undo</div>
-
-<button class="secret-btn" onclick="secretUndo()">↩ Undo Last Action</button>
-
-<button class="secret-btn" onclick="closeSecretMenu();moveToNextMonth()">📅 Move to Next Month</button>
-
-<div class="secret-toggle-row">
-<span class="secret-toggle-label">🛠 Developer Info</span>
-<label class="toggle-switch">
-<input type="checkbox" id="dev-info-toggle" onchange="toggleDevInfo(this.checked)">
-<span class="toggle-slider"></span>
-</label>
-</div>
-
-<button class="secret-btn" onclick="closeSecretMenu();openStatsSnapshot()">📸 Stats Snapshot</button>
-
-<button class="secret-btn" onclick="closeSecretMenu();downloadHTML()">⬇ Download HTML File</button>
-
-<button class="secret-btn danger" onclick="closeSecretMenu();openM('m-ra1')">☠️ Reset Everything</button>
-
-<button class="secret-close" onclick="closeSecretMenu()">Close</button>
-
-</div>
-
-</div>
 
  
 
@@ -1295,7 +1245,7 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 <!-- STATS SNAPSHOT OVERLAY -->
 <div id="stats-snapshot-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#0e0c0a;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-  <div id="stats-snapshot-content" style="width:100%;max-width:480px;margin:0 auto;padding:14px 12px 20px;font-family:'Crimson Pro',serif;color:#f0e8d8;">
+  <div id="stats-snapshot-content" style="max-width:480px;margin:0 auto;padding:20px 16px 40px;font-family:'Crimson Pro',serif;color:#f0e8d8;">
     <!-- filled by JS -->
   </div>
 </div>
@@ -1308,7 +1258,6 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 <span class="banner-corner tr">✦</span>
 
-<div class="secret-dot" id="secret-dot" onclick="event.stopPropagation();openSecretMenu()"></div>
 
 <div class="banner-mana">
 
@@ -1379,6 +1328,8 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 <button class="tab" onclick="switchTab('rewards',this)">Rewards</button>
 
 <button class="tab" onclick="switchTab('info',this)">Info</button>
+
+<button class="tab" onclick="switchTab('settings',this)">Settings</button>
 
 </div>
 
@@ -1848,9 +1799,51 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 <div id="panel-rewards" class="panel"><div id="rewards-content"><div class="reward-section"><div class="reward-head">🏆 Rewards Owed</div><div class="reward-empty">No rewards owed — keep playing to earn them!<br><br><span style="font-size:11px;opacity:.6">The month champion earns a reward each month.</span></div></div></div></div>
 
-<div id="panel-info" class="panel"><div class="isec"><div class="ititle">📊 All-Time Games</div><div class="total-games-box"><div class="total-games-num">0</div><div class="total-games-lbl">Total Games Played</div></div></div><div class="isec"><div class="ititle">📋 Player Records</div><div class="icard"><div class="irow"><div class="iav" style="background:#0e1e30"><img src="data:image/webp;base64,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" width="25" height="25" style="border-radius:50%;object-fit:cover;display:block;flex-shrink:0"></div><div><div class="iname">Riley</div></div><div class="istats"><div class="ibig" style="color:#4a9ae0">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#4a9ae0">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#4a9ae0">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#1e1c14"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><circle cx="12" cy="12" r="11" fill="rgba(180,160,90,.15)"></circle><circle cx="12" cy="12" r="8" fill="none" stroke="#c8a840" stroke-width="1.2"></circle><circle cx="12" cy="12" r="4.5" fill="#d4b840"></circle><circle cx="12" cy="12" r="2.2" fill="#fff8d0"></circle><line x1="12" y1="1" x2="12" y2="3.5" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="12" y1="20.5" x2="12" y2="23" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="1" y1="12" x2="3.5" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="20.5" y1="12" x2="23" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line></svg></div><div><div class="iname">Sydney</div></div><div class="istats"><div class="ibig" style="color:#f5f5f5">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#f5f5f5">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#f5f5f5">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#300e0e"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><path d="M12 2.5 L3.5 21.5 L20.5 21.5Z" fill="#b82828"></path><path d="M12 2.5 L8 21.5 L16 21.5Z" fill="#e03030" opacity=".85"></path><path d="M12 2.5 L10.2 11 L12 14 L13.8 11Z" fill="#ff9060" opacity=".7"></path></svg></div><div><div class="iname">Mom</div></div><div class="istats"><div class="ibig" style="color:#e05050">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#e05050">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#e05050">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#0e2a12"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><path d="M12 22 C12 22 4 17.5 4 11 C4 5.5 7.5 2 12 2 C16.5 2 20 5.5 20 11 C20 17.5 12 22 12 22Z" fill="#228a32"></path><line x1="12" y1="22" x2="12" y2="11" stroke="#6ad060" stroke-width="1.8" stroke-linecap="round"></line><path d="M12 16 C12 16 8.5 14 7 11" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path><path d="M12 12.5 C12 12.5 15.5 10.5 17 7.5" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path></svg></div><div><div class="iname">Dad</div></div><div class="istats"><div class="ibig" style="color:#50c060">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#50c060">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#50c060">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div></div><div class="isec"><div class="ititle">📜 Rules of the Realm</div><div class="ihow"><div class="ibul"><span class="bico">💾</span><span><b>Saves automatically.</b> Refresh, close — chronicle is never lost.</span></div><div class="ibul"><span class="bico">📁</span><span><b>Transfer data:</b> Log tab → Save &amp; Transfer Data → Export. Import on any device. Or use Copy Save Code for a text-based transfer that's safe across versions.</span></div><div class="ibul"><span class="bico">🏆</span><span><b>Smart ranking:</b> Wilson score — fair for 2 or 100 games. Ties broken by who held the stat longest.</span></div><div class="ibul"><span class="bico">⚡</span><span><b>Streaks persist across months.</b> Hit 6+ for GOD MODE!</span></div><div class="ibul"><span class="bico">🎁</span><span><b>Rewards tab</b> tracks champion prizes. Mark as paid when claimed.</span></div><div class="ibul"><span class="bico">↩</span><span><b>Undo</b> only works on the most recent game for fairness.</span></div><div class="ibul"><span class="bico">📅</span><span><b>Move to Next Month</b> is in the secret menu (the dot above the tracker title).</span></div></div></div></div>
+<div id="panel-info" class="panel"><div class="isec"><div class="ititle">📊 All-Time Games</div><div class="total-games-box"><div class="total-games-num">0</div><div class="total-games-lbl">Total Games Played</div></div></div><div class="isec"><div class="ititle">📋 Player Records</div><div class="icard"><div class="irow"><div class="iav" style="background:#0e1e30"><img src="data:image/webp;base64,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" width="25" height="25" style="border-radius:50%;object-fit:cover;display:block;flex-shrink:0"></div><div><div class="iname">Riley</div></div><div class="istats"><div class="ibig" style="color:#4a9ae0">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#4a9ae0">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#4a9ae0">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#1e1c14"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><circle cx="12" cy="12" r="11" fill="rgba(180,160,90,.15)"></circle><circle cx="12" cy="12" r="8" fill="none" stroke="#c8a840" stroke-width="1.2"></circle><circle cx="12" cy="12" r="4.5" fill="#d4b840"></circle><circle cx="12" cy="12" r="2.2" fill="#fff8d0"></circle><line x1="12" y1="1" x2="12" y2="3.5" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="12" y1="20.5" x2="12" y2="23" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="1" y1="12" x2="3.5" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line><line x1="20.5" y1="12" x2="23" y2="12" stroke="#c8a840" stroke-width="1.4" stroke-linecap="round"></line></svg></div><div><div class="iname">Sydney</div></div><div class="istats"><div class="ibig" style="color:#f5f5f5">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#f5f5f5">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#f5f5f5">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#300e0e"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><path d="M12 2.5 L3.5 21.5 L20.5 21.5Z" fill="#b82828"></path><path d="M12 2.5 L8 21.5 L16 21.5Z" fill="#e03030" opacity=".85"></path><path d="M12 2.5 L10.2 11 L12 14 L13.8 11Z" fill="#ff9060" opacity=".7"></path></svg></div><div><div class="iname">Mom</div></div><div class="istats"><div class="ibig" style="color:#e05050">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#e05050">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#e05050">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div><div class="icard"><div class="irow"><div class="iav" style="background:#0e2a12"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block;flex-shrink:0"><path d="M12 22 C12 22 4 17.5 4 11 C4 5.5 7.5 2 12 2 C16.5 2 20 5.5 20 11 C20 17.5 12 22 12 22Z" fill="#228a32"></path><line x1="12" y1="22" x2="12" y2="11" stroke="#6ad060" stroke-width="1.8" stroke-linecap="round"></line><path d="M12 16 C12 16 8.5 14 7 11" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path><path d="M12 12.5 C12 12.5 15.5 10.5 17 7.5" stroke="#6ad060" stroke-width="1.2" fill="none" stroke-linecap="round"></path></svg></div><div><div class="iname">Dad</div></div><div class="istats"><div class="ibig" style="color:#50c060">0%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:#50c060">0</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">0</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:#50c060">0</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">0</div></div></div></div></div><div class="isec"><div class="ititle">📜 Rules of the Realm</div><div class="ihow"><div class="ibul"><span class="bico">💾</span><span><b>Saves automatically.</b> Refresh, close — chronicle is never lost.</span></div><div class="ibul"><span class="bico">📁</span><span><b>Transfer data:</b> Log tab → Save &amp; Transfer Data → Export. Import on any device. Or use Copy Save Code for a text-based transfer that's safe across versions.</span></div><div class="ibul"><span class="bico">🏆</span><span><b>Smart ranking:</b> Wilson score — fair for 2 or 100 games. Ties broken by who held the stat longest.</span></div><div class="ibul"><span class="bico">⚡</span><span><b>Streaks persist across months.</b> Hit 6+ for GOD MODE!</span></div><div class="ibul"><span class="bico">🎁</span><span><b>Rewards tab</b> tracks champion prizes. Mark as paid when claimed.</span></div><div class="ibul"><span class="bico">↩</span><span><b>Undo</b> only works on the most recent game for fairness.</span></div><div class="ibul"><span class="bico">📅</span><span><b>Move to Next Month</b> is in the Settings tab.</span></div></div></div></div>
 
- 
+<!-- SETTINGS PANEL -->
+<div id="panel-settings" class="panel">
+  <div class="isec">
+    <div class="ititle">⚙ Settings</div>
+
+    <!-- Streak Adjust -->
+    <div class="secret-toggle-row" style="margin-bottom:8px;">
+      <span class="secret-toggle-label">Streak Adjust Mode</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="streak-adjust-toggle" onchange="toggleStreakAdjust()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div id="streak-adjust-panel" style="display:none;margin-bottom:8px;">
+      <div class="adj-streak-row" id="streak-adj-btns"></div>
+    </div>
+
+    <!-- Undo -->
+    <div id="secret-undo-preview" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2);margin-bottom:8px;min-height:16px;letter-spacing:.03em">Nothing to undo</div>
+    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="secretUndo()">↩ Undo Last Action</button>
+
+    <!-- Next Month -->
+    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="moveToNextMonth()">📅 Move to Next Month</button>
+
+    <!-- Developer Info toggle -->
+    <div class="secret-toggle-row" style="margin-bottom:8px;">
+      <span class="secret-toggle-label">🛠 Developer Info</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="dev-info-toggle" onchange="toggleDevInfo(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Snapshot & Download -->
+    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="openStatsSnapshot()">📸 Stats Snapshot</button>
+    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="downloadHTML()">⬇ Download HTML File</button>
+
+    <!-- Danger zone -->
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(200,60,60,.2);">
+      <button class="secret-btn danger" style="width:100%;margin-bottom:4px;" onclick="openM('m-ra1')">☠️ Reset Everything</button>
+    </div>
+  </div>
+</div>
 
 <script>
 
@@ -2061,11 +2054,11 @@ _pushUndo('Reset Everything', before);
 
 /* ═══ SECRET MENU ══════════════════════════════════ */
 
-function openSecretMenu(){$('secret-menu').classList.add('open');updateSecretUndoPreview();renderStreakAdjBtns();if($('dev-info-toggle'))$('dev-info-toggle').checked=!!S._devMode;}
+function openSecretMenu(){const btn=document.querySelector('.tab[onclick*="settings"]');if(btn)switchTab('settings',btn);}
 
-function closeSecretMenu(){$('secret-menu').classList.remove('open')}
+function closeSecretMenu(){/* no-op — settings is now a tab */}
 
-$('secret-menu').addEventListener('click',e=>{if(e.target===$('secret-menu'))closeSecretMenu()});
+// settings is now a tab — no overlay close handler needed
 
  
 
@@ -3320,7 +3313,7 @@ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
 
 btn.classList.add('active');
 
-const hideSummary=t==='log';
+const hideSummary=t==='log'||t==='settings';
 
 DOM.summary.style.display=hideSummary?'none':'';
 
@@ -3329,6 +3322,8 @@ DOM.hm.style.display=hideSummary?'none':'';
 if(t==='monthly'){_flameShown.clear();setupFlameObserver()}
 
 if(t==='leaderboard')renderLeaderboard();
+
+if(t==='settings'){updateSecretUndoPreview();renderStreakAdjBtns();if($('dev-info-toggle'))$('dev-info-toggle').checked=!!S._devMode;}
 
 }
 
@@ -3396,7 +3391,7 @@ return`<div class="isec"><div class="ititle">📊 All-Time Games</div><div class
 
 function buildNormalRules(){
 
-return`<div class="isec"><div class="ititle">📜 Rules of the Realm</div><div class="ihow"><div class="ibul"><span class="bico">💾</span><span><b>Saves automatically.</b> Refresh, close — chronicle is never lost.</span></div><div class="ibul"><span class="bico">📁</span><span><b>Transfer data:</b> Log tab → Save & Transfer Data → Export. Import on any device. Or use Copy Save Code for a text-based transfer that's safe across versions.</span></div><div class="ibul"><span class="bico">🏆</span><span><b>Smart ranking:</b> Wilson score — fair for 2 or 100 games. Ties broken by who held the stat longest.</span></div><div class="ibul"><span class="bico">⚡</span><span><b>Streaks persist across months.</b> Hit 6+ for GOD MODE!</span></div><div class="ibul"><span class="bico">🎁</span><span><b>Rewards tab</b> tracks champion prizes. Mark as paid when claimed.</span></div><div class="ibul"><span class="bico">↩</span><span><b>Undo</b> only works on the most recent game for fairness.</span></div><div class="ibul"><span class="bico">📅</span><span><b>Move to Next Month</b> is in the secret menu (the dot above the tracker title).</span></div></div></div>`;
+return`<div class="isec"><div class="ititle">📜 Rules of the Realm</div><div class="ihow"><div class="ibul"><span class="bico">💾</span><span><b>Saves automatically.</b> Refresh, close — chronicle is never lost.</span></div><div class="ibul"><span class="bico">📁</span><span><b>Transfer data:</b> Log tab → Save & Transfer Data → Export. Import on any device. Or use Copy Save Code for a text-based transfer that's safe across versions.</span></div><div class="ibul"><span class="bico">🏆</span><span><b>Smart ranking:</b> Wilson score — fair for 2 or 100 games. Ties broken by who held the stat longest.</span></div><div class="ibul"><span class="bico">⚡</span><span><b>Streaks persist across months.</b> Hit 6+ for GOD MODE!</span></div><div class="ibul"><span class="bico">🎁</span><span><b>Rewards tab</b> tracks champion prizes. Mark as paid when claimed.</span></div><div class="ibul"><span class="bico">↩</span><span><b>Undo</b> only works on the most recent game for fairness.</span></div><div class="ibul"><span class="bico">📅</span><span><b>Move to Next Month</b> is in the Settings tab.</span></div></div></div>`;
 
 }
 
@@ -3527,19 +3522,19 @@ function playerRow(p){
   const skTxt=sk>=6?`⚡${sk} GOD`:sk>=2?`🔥${sk}`:sk===1?`🔥1`:'—';
   const skColor=sk>=6?'#ffe060':sk>=2?'#ff8040':'#8a7050';
   return`<tr>
-    <td style="padding:5px 6px;border-bottom:1px solid #2a2010;">
-      <div style="display:flex;align-items:center;gap:5px;">
-        <div style="width:22px;height:22px;border-radius:50%;background:${pl.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${manaIcon(p,14)}</div>
-        <span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:${pl.cl}">${ESC(p)}</span>
+    <td style="padding:8px 6px;border-bottom:1px solid #2a2010;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:${pl.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${manaIcon(p,18)}</div>
+        <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${pl.cl}">${ESC(p)}</span>
       </div>
     </td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:${pl.cl};font-weight:700">${mw}</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:#8a7050">${ml}</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:${pl.cl};font-weight:700">${aw}</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:#8a7050">${al}</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:${pl.cl}">${pct(aw,al)}%</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:10px;color:${skColor};font-weight:700">${skTxt}</td>
-    <td style="padding:5px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:10px;color:#8a7050">${ag}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:12px;color:${pl.cl};font-weight:700">${mw}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:12px;color:#8a7050">${ml}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:12px;color:${pl.cl};font-weight:700">${aw}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:12px;color:#8a7050">${al}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:12px;color:${pl.cl}">${pct(aw,al)}%</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:${skColor};font-weight:700">${skTxt}</td>
+    <td style="padding:8px 4px;border-bottom:1px solid #2a2010;text-align:center;font-family:'Cinzel',serif;font-size:11px;color:#8a7050">${ag}</td>
   </tr>`;
 }
 
@@ -3561,115 +3556,125 @@ const topStreak=S.sk[streakLeader]||0;
 
 // ── build HTML ────────────────────────────────────────────
 ct.innerHTML=`
-<!-- HEADER -->
-<div style="text-align:center;margin-bottom:10px;">
-  <div style="font-family:'Cinzel Decorative',serif;font-size:18px;font-weight:900;color:#d4a843;text-shadow:0 0 20px rgba(212,168,67,.4);letter-spacing:.06em">MTG TRACKER</div>
-  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;">
-    <div style="font-family:'Cinzel',serif;font-size:9px;color:#8a7050;letter-spacing:.2em;text-transform:uppercase">Chronicle of Champions</div>
-    <div style="font-family:'Cinzel',serif;font-size:10px;color:#d4a843;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:20px;padding:2px 10px;letter-spacing:.06em">${displayMonth()}</div>
-  </div>
+<div style="text-align:center;margin-bottom:20px;">
+  <div style="font-family:'Cinzel Decorative',serif;font-size:20px;font-weight:900;color:#d4a843;text-shadow:0 0 20px rgba(212,168,67,.4);letter-spacing:.06em">MTG TRACKER</div>
+  <div style="font-family:'Cinzel',serif;font-size:10px;color:#8a7050;letter-spacing:.25em;margin-top:2px;text-transform:uppercase">Chronicle of Champions</div>
+  <div style="display:inline-block;font-family:'Cinzel',serif;font-size:11px;color:#d4a843;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:20px;padding:3px 14px;margin-top:8px;letter-spacing:.06em">${displayMonth()}</div>
 </div>
 
 <!-- TOP STATS ROW -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
-  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:10px;padding:8px 6px;text-align:center;">
-    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Month Leader</div>
-    <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#d4a843;line-height:1.1">${mLeaderWins>0?ESC(mLeader):'—'}</div>
-    <div style="font-size:10px;color:#5a4428;margin-top:1px">${mLeaderWins} wins</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:12px;padding:12px 8px;text-align:center;">
+    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Month Leader</div>
+    <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#d4a843">${mLeaderWins>0?ESC(mLeader):'—'}</div>
+    <div style="font-size:10px;color:#5a4428;margin-top:2px">${mLeaderWins} wins</div>
   </div>
-  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:10px;padding:8px 6px;text-align:center;">
-    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">Games / Month</div>
-    <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:#d4a843;line-height:1.1">${totalMonthGames}</div>
-    <div style="font-size:10px;color:#5a4428;margin-top:1px">${totalAllTimeGames} all time</div>
+  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:12px;padding:12px 8px;text-align:center;">
+    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Games / Month</div>
+    <div style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#d4a843">${totalMonthGames}</div>
+    <div style="font-size:10px;color:#5a4428;margin-top:2px">${totalAllTimeGames} all time</div>
   </div>
-  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:10px;padding:8px 6px;text-align:center;">
-    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px">All-Time King</div>
-    <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#d4a843;line-height:1.1">${atLeaderWins>0?ESC(atLeader):'—'}</div>
-    <div style="font-size:10px;color:#5a4428;margin-top:1px">${atLeaderWins} wins</div>
+  <div style="background:linear-gradient(160deg,#221c15,#1a1510);border:1px solid #3d3020;border-radius:12px;padding:12px 8px;text-align:center;">
+    <div style="font-family:'Cinzel',serif;font-size:8px;color:#8a7050;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">All-Time King</div>
+    <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#d4a843">${atLeaderWins>0?ESC(atLeader):'—'}</div>
+    <div style="font-size:10px;color:#5a4428;margin-top:2px">${atLeaderWins} wins</div>
   </div>
 </div>
 
-<!-- HOT STREAK — only shown when someone has a streak >= 2 -->
-${topStreak>=2?`<div style="background:linear-gradient(135deg,rgba(255,128,64,.12),rgba(255,60,0,.06));border:1px solid rgba(255,100,40,.3);border-radius:8px;padding:7px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-  <div style="font-size:18px;line-height:1">${topStreak>=6?'⚡':'🔥'}</div>
+<!-- HOT STREAK -->
+${topStreak>=2?`<div style="background:linear-gradient(135deg,rgba(255,128,64,.12),rgba(255,60,0,.06));border:1px solid rgba(255,100,40,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+  <div style="font-size:22px">${topStreak>=6?'⚡':'🔥'}</div>
   <div>
     <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:${topStreak>=6?'#ffe060':'#ff8040'}">${ESC(streakLeader)} ${topStreak>=6?'IS IN GOD MODE':'is on fire'}</div>
-    <div style="font-size:11px;color:#8a7050">${topStreak} win streak${topStreak>=6?' ⚡ Unstoppable ⚡':''}</div>
+    <div style="font-size:11px;color:#8a7050;margin-top:1px">${topStreak} win streak ${topStreak>=6?'⚡ Unstoppable ⚡':''}</div>
   </div>
 </div>`:''}
 
 <!-- PLAYER STATS TABLE -->
-<div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:10px;overflow:hidden;margin-bottom:10px;">
-  <div style="padding:7px 10px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
-    <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#d4a843;letter-spacing:.06em">⚔ PLAYER RECORDS</span>
+<div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+  <div style="padding:10px 12px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
+    <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#d4a843;letter-spacing:.08em">⚔ PLAYER RECORDS</span>
   </div>
-  <table style="width:100%;border-collapse:collapse;">
-    <thead>
-      <tr style="background:rgba(0,0,0,.3);">
-        <th style="padding:5px 6px;text-align:left;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.04em;border-bottom:1px solid #2a2010">PLAYER</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">MW</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">ML</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">AW</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">AL</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">WR%</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">STK</th>
-        <th style="padding:5px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;border-bottom:1px solid #2a2010">GP</th>
-      </tr>
-    </thead>
-    <tbody>${S.players.map(playerRow).join('')}</tbody>
-  </table>
-  <div style="padding:4px 8px 6px;">
-    <span style="font-size:8.5px;color:#5a4428;font-family:'Cinzel',serif">MW=Month W &nbsp;ML=Month L &nbsp;AW=All-Time W &nbsp;AL=All-Time L &nbsp;WR%=Win Rate &nbsp;STK=Streak &nbsp;GP=Games</span>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;min-width:320px;">
+      <thead>
+        <tr style="background:rgba(0,0,0,.3);">
+          <th style="padding:6px 6px;text-align:left;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">PLAYER</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">MW</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">ML</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">AW</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">AL</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">WR%</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">STK</th>
+          <th style="padding:6px 4px;text-align:center;font-family:'Cinzel',serif;font-size:9px;color:#5a4428;font-weight:600;letter-spacing:.06em;border-bottom:1px solid #2a2010">GP</th>
+        </tr>
+      </thead>
+      <tbody>${S.players.map(playerRow).join('')}</tbody>
+    </table>
+  </div>
+  <div style="padding:6px 10px 8px;display:flex;gap:16px;flex-wrap:wrap;">
+    <span style="font-size:9px;color:#5a4428;font-family:'Cinzel',serif">MW=Month Wins &nbsp; ML=Month Losses &nbsp; AW=All-Time Wins &nbsp; AL=All-Time Losses &nbsp; WR%=Win Rate &nbsp; STK=Streak &nbsp; GP=Games Played</span>
   </div>
 </div>
 
-<!-- RANKINGS SIDE BY SIDE -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
-
-  <!-- MONTHLY -->
-  <div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:10px;overflow:hidden;">
-    <div style="padding:6px 10px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
-      <span style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:#d4a843;letter-spacing:.04em">🏆 THIS MONTH</span>
-    </div>
-    <div style="padding:6px 8px;">
-      ${mSorted.map((p,i)=>{
-        const pl=pal(p);const mw=S.mW[p]||0,ml=S.mL[p]||0;
-        const medals=['🥇','🥈','🥉','4️⃣'];
-        return`<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:${i<mSorted.length-1?'1px solid #1a1510':'none'};">
-          <span style="font-size:13px;width:18px;text-align:center;flex-shrink:0">${medals[i]||'·'}</span>
-          <div style="width:18px;height:18px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,11)}</div>
-          <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(p)}</span>
-          <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex-shrink:0">${mw}W</span>
-        </div>`;
-      }).join('')}
-    </div>
+<!-- MONTHLY RANKING -->
+<div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+  <div style="padding:10px 12px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
+    <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#d4a843;letter-spacing:.08em">🏆 THIS MONTH RANKINGS</span>
   </div>
-
-  <!-- ALL-TIME -->
-  <div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:10px;overflow:hidden;">
-    <div style="padding:6px 10px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
-      <span style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:#d4a843;letter-spacing:.04em">👑 ALL-TIME</span>
-    </div>
-    <div style="padding:6px 8px;">
-      ${atSorted.map((p,i)=>{
-        const pl=pal(p);const aw=S.aW[p]||0,al=S.aL[p]||0;
-        const medals=['🥇','🥈','🥉','4️⃣'];
-        return`<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:${i<atSorted.length-1?'1px solid #1a1510':'none'};">
-          <span style="font-size:13px;width:18px;text-align:center;flex-shrink:0">${medals[i]||'·'}</span>
-          <div style="width:18px;height:18px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,11)}</div>
-          <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(p)}</span>
-          <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex-shrink:0">${aw}W</span>
-        </div>`;
-      }).join('')}
-    </div>
+  <div style="padding:10px 12px;">
+    ${mSorted.map((p,i)=>{
+      const pl=pal(p);const mw=S.mW[p]||0,ml=S.mL[p]||0;
+      const medals=['🥇','🥈','🥉','4️⃣'];
+      return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:${i<mSorted.length-1?'1px solid #1a1510':'none'};">
+        <span style="font-size:16px;width:22px;text-align:center">${medals[i]||'·'}</span>
+        <div style="width:24px;height:24px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,16)}</div>
+        <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${pl.cl};flex:1">${ESC(p)}</span>
+        <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${pl.cl}">${mw}W</span>
+        <span style="font-size:11px;color:#5a4428">${ml}L</span>
+        <span style="font-family:'Cinzel',serif;font-size:11px;color:${pl.cl};min-width:36px;text-align:right">${pct(mw,ml)}%</span>
+      </div>`;
+    }).join('')}
   </div>
-
 </div>
 
-<!-- GENERATED TIMESTAMP + CLOSE -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
-  <div style="font-family:'Cinzel',serif;font-size:9px;color:#3d3020;letter-spacing:.08em">Generated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-  <button onclick="closeStatsSnapshot()" style="background:linear-gradient(135deg,#221c14,#18120c);border:1px solid #5a4428;border-radius:20px;color:#d4a843;font-family:'Cinzel',serif;font-size:11px;font-weight:700;padding:7px 20px;cursor:pointer;letter-spacing:.04em;box-shadow:0 2px 12px rgba(0,0,0,.5);">✕ Close</button>
+<!-- ALL-TIME RANKING -->
+<div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+  <div style="padding:10px 12px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
+    <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#d4a843;letter-spacing:.08em">👑 ALL-TIME RANKINGS</span>
+  </div>
+  <div style="padding:10px 12px;">
+    ${atSorted.map((p,i)=>{
+      const pl=pal(p);const aw=S.aW[p]||0,al=S.aL[p]||0;
+      const medals=['🥇','🥈','🥉','4️⃣'];
+      return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:${i<atSorted.length-1?'1px solid #1a1510':'none'};">
+        <span style="font-size:16px;width:22px;text-align:center">${medals[i]||'·'}</span>
+        <div style="width:24px;height:24px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,16)}</div>
+        <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${pl.cl};flex:1">${ESC(p)}</span>
+        <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${pl.cl}">${aw}W</span>
+        <span style="font-size:11px;color:#5a4428">${al}L</span>
+        <span style="font-family:'Cinzel',serif;font-size:11px;color:${pl.cl};min-width:36px;text-align:right">${pct(aw,al)}%</span>
+      </div>`;
+    }).join('')}
+  </div>
+</div>
+
+<!-- RECENT GAMES -->
+${recentGames.length?`<div style="background:linear-gradient(160deg,#1a1510,#14110d);border:1px solid #3d3020;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+  <div style="padding:10px 12px;border-bottom:1px solid #2a2010;background:rgba(212,168,67,.05);">
+    <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#d4a843;letter-spacing:.08em">📜 RECENT BATTLES (last 10)</span>
+  </div>
+  <div style="padding:8px 12px;">${logRows}</div>
+</div>`:''}
+
+<!-- GENERATED TIMESTAMP -->
+<div style="text-align:center;margin-top:8px;">
+  <div style="font-family:'Cinzel',serif;font-size:9px;color:#3d3020;letter-spacing:.1em">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+</div>
+
+<!-- CLOSE BUTTON -->
+<div style="position:sticky;bottom:16px;text-align:center;margin-top:20px;">
+  <button onclick="closeStatsSnapshot()" style="background:linear-gradient(135deg,#221c14,#18120c);border:1px solid #5a4428;border-radius:24px;color:#d4a843;font-family:'Cinzel',serif;font-size:12px;font-weight:700;padding:12px 32px;cursor:pointer;letter-spacing:.06em;box-shadow:0 4px 20px rgba(0,0,0,.6);">✕ Close</button>
 </div>
 `;
 
