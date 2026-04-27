@@ -441,6 +441,16 @@ font-family:'Cinzel',serif;font-size:11px;font-weight:600;cursor:pointer;margin-
 
 .secret-btn.danger:hover{background:rgba(200,60,60,.1);border-color:rgba(200,60,60,.5)}
 
+#revert-undo-btn:not([disabled]){opacity:1!important;border-color:rgba(212,168,67,.4);color:var(--gold);}
+#revert-undo-btn:not([disabled]):hover{background:rgba(212,168,67,.12);border-color:rgba(212,168,67,.6);}
+
+/* SETTINGS SECTIONS */
+.settings-section{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px;margin-bottom:10px;position:relative;overflow:hidden;}
+.settings-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,67,.2),transparent);}
+.settings-section-danger{background:linear-gradient(160deg,#1c1010,#160c0c);border-color:rgba(180,40,40,.25);}
+.settings-section-danger::before{background:linear-gradient(90deg,transparent,rgba(200,60,60,.25),transparent);}
+.settings-section-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+
 .secret-close{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.05);
 
 background:transparent;color:var(--tx3);font-family:'Cinzel',serif;font-size:10px;cursor:pointer;margin-top:4px;transition:all .15s;}
@@ -1340,16 +1350,14 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 <div class="mana-pip" title="Swamp — Black" style="background:radial-gradient(circle at 35% 35%,#5a4a7a,#1a0e2a);animation-delay:.6s">
 
-<svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 2 C6 2 3 5 3 10 C3 12 4 14 5.5 15.5 C6 16 5.5 17 5 17.5 C5 17.5 7 17 8 16 C8.6 16.3 9.3 16.5 10 16.5 C14 16.5 17 13.5 17 10 C17 5 14 2 10 2Z" fill="#7a5a9a" opacity=".9"></path><path d="M10 5 C10 5 7 7 7 10 C7 12 8.3 13.5 10 13.5" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none" stroke-linecap="round"></path></svg>
+<img src="data:image/webp;base64,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" width="14" height="14" style="border-radius:50%;object-fit:cover;display:block;flex-shrink:0">
 
 </div>
 
 <!-- Red — Mom -->
 
-<div class="mana-pip" title="Mountain — Mom" style="background:radial-gradient(circle at 35% 35%,#e84040,#9b2020);animation-delay:.9s">
-
-<svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 3 L3.5 17 L16.5 17Z" fill="#c83030"></path><path d="M10 3 L7 17 L13 17Z" fill="#e85050" opacity=".85"></path><path d="M10 3 L8.8 9.5 L10 11.5 L11.2 9.5Z" fill="#ff9060" opacity=".7"></path></svg>
-
+<div class="mana-pip" title="Mountain — Mom" style="background:radial-gradient(circle at 35% 35%,#e84040,#9b2020);animation-delay:.9s;display:flex;align-items:center;justify-content:center;">
+<span id="banner-mom-icon"></span>
 </div>
 
 <!-- Green — Dad -->
@@ -1860,10 +1868,19 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 <!-- SETTINGS PANEL -->
 <div id="panel-settings" class="panel">
-  <div class="isec">
-    <div class="ititle">⚙ Settings</div>
+  <div class="ititle" style="margin-bottom:14px;">⚙ Settings</div>
 
-    <!-- Streak Adjust -->
+  <!-- ── UNDO ── -->
+  <div class="settings-section">
+    <div class="settings-section-title">↩ Undo</div>
+    <div id="secret-undo-preview" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2);margin-bottom:8px;min-height:16px;letter-spacing:.03em">Nothing to undo</div>
+    <button class="secret-btn" id="secret-undo-btn" style="width:100%;margin-bottom:6px;" onclick="secretUndo()">↩ Undo Last Action</button>
+    <button class="secret-btn" id="revert-undo-btn" disabled style="width:100%;opacity:0.3;border-color:rgba(212,168,67,.2);color:#d4a843;font-size:10px;" onclick="secretRevert()" title="Nothing to revert — use Undo Last Action first">⤴ Revert Last Undo (restores + re-enables undo)</button>
+  </div>
+
+  <!-- ── ADJUSTMENTS ── -->
+  <div class="settings-section">
+    <div class="settings-section-title">🎚 Adjustments</div>
     <div class="secret-toggle-row" style="margin-bottom:8px;">
       <span class="secret-toggle-label">Streak Adjust Mode</span>
       <label class="toggle-switch">
@@ -1874,32 +1891,28 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
     <div id="streak-adjust-panel" style="display:none;margin-bottom:8px;">
       <div class="adj-streak-row" id="streak-adj-btns"></div>
     </div>
-
-    <!-- Undo -->
-    <div id="secret-undo-preview" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2);margin-bottom:8px;min-height:16px;letter-spacing:.03em">Nothing to undo</div>
-    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="secretUndo()">↩ Undo Last Action</button>
-
-    <!-- Next Month -->
-    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="moveToNextMonth()">📅 Move to Next Month</button>
-
-    <!-- Developer Info toggle -->
-    <div class="secret-toggle-row" style="margin-bottom:8px;">
+    <div class="secret-toggle-row">
       <span class="secret-toggle-label">🛠 Developer Info</span>
       <label class="toggle-switch">
         <input type="checkbox" id="dev-info-toggle" onchange="toggleDevInfo(this.checked)">
         <span class="toggle-slider"></span>
       </label>
     </div>
+  </div>
 
-    <!-- Snapshot & Download -->
+  <!-- ── MISC ── -->
+  <div class="settings-section">
+    <div class="settings-section-title">✦ Misc</div>
     <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="openStatsSnapshot()">📸 Stats Snapshot</button>
-    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="downloadHTML()">⬇ Download HTML File</button>
+    <button class="secret-btn" style="width:100%;margin-bottom:8px;" onclick="moveToNextMonth()">📅 Move to Next Month</button>
+    <button class="secret-btn" style="width:100%;" onclick="downloadHTML()">⬇ Download HTML File</button>
+  </div>
 
-    <!-- Danger zone -->
-    <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(200,60,60,.2);">
-      <button class="secret-btn danger" style="width:100%;margin-bottom:4px;" onclick="openM('m-rm1')">📅 Reset Current Month's Stats</button>
-      <button class="secret-btn danger" style="width:100%;margin-bottom:4px;" onclick="raHoldOpen()">☠️ Reset Everything</button>
-    </div>
+  <!-- ── RESET ── -->
+  <div class="settings-section settings-section-danger">
+    <div class="settings-section-title" style="color:#e06060;">⚠ Reset</div>
+    <button class="secret-btn danger" style="width:100%;margin-bottom:8px;" onclick="openM('m-rm1')">📅 Reset Current Month's Stats</button>
+    <button class="secret-btn danger" style="width:100%;" onclick="raHoldOpen()">☠️ Reset Everything</button>
   </div>
 </div>
 
@@ -2325,16 +2338,6 @@ el.textContent=`Will undo: ${g.winner} beat ${los} (${g.date})`;
 
  
 
-function secretUndo(){
-
-if(!S.log.length){alert('Nothing to undo!');return}
-
-_undoIndex=0;showUndoModal(0);closeSecretMenu();
-
-}
-
- 
-
 /* ═══ MOVE TO NEXT MONTH ════════════════════════════ */
 
 function moveToNextMonth(){
@@ -2409,25 +2412,13 @@ if($('dev-info-toggle'))$('dev-info-toggle').checked=on;
 /* ═══ DOWNLOAD HTML ═════════════════════════════════ */
 
 function downloadHTML(){
-
 try{
-
-const html=document.documentElement.outerHTML;
-
-const blob=new Blob([html],{type:'text/html'});
-
-const url=URL.createObjectURL(blob);
-
-const a=document.createElement('a');
-
-a.href=url;a.download='MTGTracker.html';
-
-document.body.appendChild(a);a.click();document.body.removeChild(a);
-
-setTimeout(()=>URL.revokeObjectURL(url),5000);
-
+const htmlContent=document.documentElement.outerHTML;
+const blob=new Blob([htmlContent],{type:'text/html'});
+blob.arrayBuffer().then(buf=>{
+  window.parent.postMessage({type:'downloadFile',filename:'MTGTracker.html',data:buf,mimeType:'text/html'},'*');
+});
 }catch(e){alert('Download failed — try exporting the save file instead.')}
-
 }
 
  
@@ -2529,14 +2520,17 @@ function closeEOM(){$('eom-overlay').classList.remove('open');_skipMonthCheck=tr
 
 /* ═══ UNIVERSAL UNDO SYSTEM ════════════════════════ */
 
-// Action stack: each entry = { type, snapshot: {full S copy}, description }
-let _actionStack = [];  // stack of undoable states (before the action)
+// Action stack: each entry = { description, state: deep copy of S before action }
+let _actionStack = [];  // stack of undoable states
 let _undoIndex = 0;     // kept for backward compat with showUndoModal
+// Revert slot: stores the state snapshot so we can revert the last undo
+let _revertState = null;  // { description, state } or null
 
 function _pushUndo(description, stateBefore){
-  // stateBefore is a deep copy of S taken BEFORE the action
   _actionStack.push({ description, state: JSON.parse(JSON.stringify(stateBefore)) });
   if(_actionStack.length > 60) _actionStack.shift();
+  // Any new action clears the revert slot (can't revert after a new action)
+  _revertState = null;
   updateSecretUndoPreview();
 }
 
@@ -2545,25 +2539,62 @@ function _captureState(){ return JSON.parse(JSON.stringify(S)); }
 function updateSecretUndoPreview(){
   const el = $('secret-undo-preview');
   if(!el) return;
-  if(!_actionStack.length){ el.textContent = 'Nothing to undo'; return; }
-  const last = _actionStack[_actionStack.length - 1];
-  el.textContent = `Will undo: ${last.description}`;
+  if(!_actionStack.length){ el.textContent = 'Nothing to undo'; }
+  else {
+    const last = _actionStack[_actionStack.length - 1];
+    el.textContent = `Will undo: ${last.description}`;
+  }
+  // Update revert button state
+  const revertBtn = $('revert-undo-btn');
+  if(revertBtn){
+    if(_revertState){
+      revertBtn.disabled = false;
+      revertBtn.title = `Revert last undo: ${_revertState.description}`;
+      revertBtn.style.opacity = '1';
+    } else {
+      revertBtn.disabled = true;
+      revertBtn.title = 'Nothing to revert — use Undo Last Action first';
+      revertBtn.style.opacity = '0.3';
+    }
+  }
+  // Update undo button enabled state
+  const undoBtn = $('secret-undo-btn');
+  if(undoBtn){
+    if(_actionStack.length){
+      undoBtn.disabled = false; undoBtn.style.opacity = '1';
+    } else {
+      undoBtn.disabled = true; undoBtn.style.opacity = '0.35';
+    }
+  }
 }
 
 function secretUndo(){
-  if(!_actionStack.length){ alert('Nothing to undo!'); return; }
+  if(!_actionStack.length){ return; }
   const last = _actionStack[_actionStack.length - 1];
-  // Push current state as an "undo-of-undo" entry so we can redo
   const before = _captureState();
-  // Restore
+  // Restore S to the snapshot taken before the action was performed
   S = migrateState(JSON.parse(JSON.stringify(last.state)));
-  // Replace the entry with a "redo" entry pointing back
-  _actionStack[_actionStack.length - 1] = {
-    description: `Re-do: ${last.description}`,
-    state: before,
-    isRedo: true
-  };
-  save(); render(); closeSecretMenu(); updateSecretUndoPreview();
+  // Store revert info:
+  //   .state      = what S was just before this undo (so revert restores it)
+  //   .stackEntry = the pre-action snapshot (so revert can push it back on the stack)
+  //   .description = label for the button tooltip
+  _revertState = { description: last.description, state: before, stackEntry: last.state };
+  // Pop from the stack — undo itself is NOT pushed (not re-undoable)
+  _actionStack.pop();
+  save(); render(); updateSecretUndoPreview();
+}
+
+function secretRevert(){
+  // Revert the last undo — restores S to what it was before the undo,
+  // AND puts the action back on the stack so you can undo it again if you want.
+  // The revert itself is NOT pushed to the stack (cannot be re-undone).
+  if(!_revertState){ return; }
+  // Restore the state we had before the undo (i.e. the post-action state)
+  S = migrateState(JSON.parse(JSON.stringify(_revertState.state)));
+  // Put the original action back on top of the stack so it can be undone again
+  _actionStack.push({ description: _revertState.description, state: JSON.parse(JSON.stringify(_revertState.stackEntry)) });
+  _revertState = null;  // clear revert slot
+  save(); render(); updateSecretUndoPreview();
 }
 
 // Legacy undo path (from log button in history / log tab)
@@ -2609,29 +2640,16 @@ function redoGame(){ /* kept for backward compat — no-op now */ }
 function toggleShare(){DOM.sharePanel.style.display=DOM.sharePanel.style.display==='none'?'block':'none'}
 
 function exportData(){
-
 try{
-
 const payload={_schema:2,_exported:new Date().toISOString(),...S};
-
 const json=JSON.stringify(payload,null,2);
-
 const blob=new Blob([json],{type:'application/json;charset=utf-8'});
-
-const url=URL.createObjectURL(blob);
-
-const a=document.createElement('a');
-
-a.href=url;a.download=`${CFG.saveFileName}_${ym()}.json`;
-
-document.body.appendChild(a);a.click();
-
-setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
-
+const filename=`${CFG.saveFileName}_${ym()}.json`;
+blob.arrayBuffer().then(buf=>{
+  window.parent.postMessage({type:'downloadFile',filename,data:buf,mimeType:'application/json'},'*');
+});
 setShareStatus('✦ Save file exported successfully!');
-
 }catch(e){setShareStatus('✦ Export failed: '+e.message);}
-
 }
 
 function importData(input){
@@ -2912,7 +2930,7 @@ const angle=(Math.PI*2*i/count)+(Math.random()-.5)*.4;
 
 const speed=5+Math.random()*12;
 
-return{x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-(2+Math.random()*5),size:3+Math.random()*9,color:COLORS[Math.floor(Math.random()*COLORS.length)],alpha:1,rotation:Math.random()*Math.PI*2,rotSpeed:(Math.random()-.5)*.3,isRect:Math.random()>.4,gravity:.22+Math.random()*.15};
+return{x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-(1.5+Math.random()*4),size:2+Math.random()*6,color:COLORS[Math.floor(Math.random()*COLORS.length)],alpha:1,rotation:Math.random()*Math.PI*2,rotSpeed:(Math.random()-.5)*.2,isRect:Math.random()>.5,gravity:.18+Math.random()*.12};
 
 });
 
@@ -2926,7 +2944,7 @@ ctx.clearRect(0,0,canvas.width,canvas.height);let alive=false;
 
 _particles.forEach(p=>{
 
-p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=.98;p.alpha-=.016;p.rotation+=p.rotSpeed;
+p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=.97;p.alpha-=.022;p.rotation+=p.rotSpeed;
 
 if(p.alpha<=0)return;alive=true;
 
@@ -2978,132 +2996,154 @@ _drawLightning();
 }
 
 function _drawLightning(){
-
-if(_lightFrames>55){
-
-lctx.clearRect(0,0,DOM.lightCanvas.width,DOM.lightCanvas.height);
-
-DOM.lightCanvas.classList.remove('active');_lightRaf=null;return;
-
+const TOTAL_FRAMES = 60;
+if(_lightFrames>TOTAL_FRAMES){
+  lctx.clearRect(0,0,DOM.lightCanvas.width,DOM.lightCanvas.height);
+  DOM.lightCanvas.classList.remove('active');_lightRaf=null;return;
 }
 
-_lightFrames++;_lightPhase+=0.18;
+_lightFrames++;_lightPhase+=0.22;
 
-// Fade-in and fade-out envelope
-const env = _lightFrames<8 ? _lightFrames/8 : _lightFrames>45 ? (55-_lightFrames)/10 : 1;
+// Natural lightning envelope: quick flash, sustain, fade
+const env = _lightFrames<5 ? _lightFrames/5
+           : _lightFrames>50 ? Math.max(0,(TOTAL_FRAMES-_lightFrames)/10)
+           : 1;
 
 lctx.clearRect(0,0,DOM.lightCanvas.width,DOM.lightCanvas.height);
 
-// Flicker: skip every few frames for realistic flash
-const flicker = Math.random() > 0.25;
+// Realistic flicker — natural rhythm, not pure random
+const baseFlicker = Math.sin(_lightPhase*3.7)*0.5+0.5;
+const flicker = baseFlicker > (0.15+Math.random()*0.25);
 
-if(flicker){
+if(flicker && env > 0){
 
-// Background ambient glow pulse
+// Sky illumination — faint blue-white flash
+const skyAlpha = (0.03+baseFlicker*0.07)*env;
+lctx.fillStyle=`rgba(180,210,255,${skyAlpha})`;
+lctx.fillRect(0,0,DOM.lightCanvas.width,DOM.lightCanvas.height);
+
+// Wide ambient glow from top (where lightning originates)
 const grd=lctx.createRadialGradient(
   DOM.lightCanvas.width/2,0,0,
-  DOM.lightCanvas.width/2,DOM.lightCanvas.height/2,DOM.lightCanvas.height
+  DOM.lightCanvas.width/2,DOM.lightCanvas.height*0.6,DOM.lightCanvas.height*0.8
 );
-const glowAlpha = (0.04+Math.abs(Math.sin(_lightPhase))*0.06)*env;
-grd.addColorStop(0,`rgba(80,140,255,${glowAlpha})`);
-grd.addColorStop(0.4,`rgba(40,80,200,${glowAlpha*0.4})`);
+const glowAlpha = (0.06+baseFlicker*0.08)*env;
+grd.addColorStop(0,`rgba(120,180,255,${glowAlpha})`);
+grd.addColorStop(0.3,`rgba(60,100,220,${glowAlpha*0.4})`);
 grd.addColorStop(1,'rgba(0,0,0,0)');
 lctx.fillStyle=grd;
 lctx.fillRect(0,0,DOM.lightCanvas.width,DOM.lightCanvas.height);
 
-// Draw 3-7 bolts spread across full screen
-const boltCount=3+Math.floor(Math.random()*5);
-
-for(let b=0;b<boltCount;b++){
-
-const startX=Math.random()*DOM.lightCanvas.width;
-
-const endX=startX+(Math.random()-.5)*300;
-
-const endY=DOM.lightCanvas.height*(0.7+Math.random()*0.3);
-
-_drawBolt(startX,0,endX,endY,0,env);
-
+// Main bolt(s) — 1-2 primary bolts + smaller branches
+// Primary bolts start from top, drift down
+const primaryCount = Math.random()>0.35 ? 2 : 1;
+for(let b=0;b<primaryCount;b++){
+  const startX = DOM.lightCanvas.width*(0.25+Math.random()*0.5);
+  const drift = (Math.random()-.5)*200;
+  const endY = DOM.lightCanvas.height*(0.55+Math.random()*0.35);
+  _drawBolt(startX,0,startX+drift,endY,0,env*(0.85+Math.random()*0.15));
 }
 
-// Occasional horizontal branching arc
+// Faint secondary bolt occasionally
 if(Math.random()>0.6){
-  const ax=Math.random()*DOM.lightCanvas.width;
-  const ay=Math.random()*DOM.lightCanvas.height*0.5;
-  _drawBolt(ax,ay,ax+(Math.random()-.5)*400,ay+(Math.random()-.5)*100,2,env*0.5);
+  const sx=DOM.lightCanvas.width*(0.1+Math.random()*0.8);
+  _drawBolt(sx,0,sx+(Math.random()-.5)*150,DOM.lightCanvas.height*(0.4+Math.random()*0.3),0,env*0.45);
+}
+
+// Occasional horizontal "leader" arc between clouds
+if(Math.random()>0.72){
+  const ax=Math.random()*DOM.lightCanvas.width*0.4;
+  const ay=DOM.lightCanvas.height*(0.05+Math.random()*0.15);
+  _drawBolt(ax,ay,ax+150+Math.random()*200,ay+(Math.random()-.5)*60,2,env*0.35);
 }
 
 }
 
 _lightRaf=requestAnimationFrame(_drawLightning);
-
 }
 
 function _drawBolt(x1,y1,x2,y2,depth=0,env=1){
+if(depth>5)return;
 
-if(depth>6)return;
-
+// Generate jagged path — more displacement at lower depths, less at branches
 const pts=[{x:x1,y:y1}];
-const segs=6+Math.floor(Math.random()*6);
+const segs=7+Math.floor(Math.random()*5);
+const mainLen=Math.sqrt((x2-x1)**2+(y2-y1)**2);
 for(let i=1;i<segs;i++){
   const t=i/segs;
-  const bx=x1+(x2-x1)*t+(Math.random()-.5)*(180-depth*22);
-  const by=y1+(y2-y1)*t+(Math.random()-.5)*(60-depth*8);
+  // Perpendicular displacement scales with depth and segment length
+  const disp=(140-depth*25)*(1-t*0.4);
+  const nx=-(y2-y1)/mainLen; const ny=(x2-x1)/mainLen; // normal to bolt
+  const jitter=(Math.random()-.5)*disp;
+  const bx=x1+(x2-x1)*t+nx*jitter;
+  const by=y1+(y2-y1)*t+ny*jitter+(Math.random()-.5)*(30-depth*5);
   pts.push({x:bx,y:by});
 }
 pts.push({x:x2,y:y2});
 
-// Draw glow pass first (wide, soft)
+const alpha=Math.max(0,(0.92-depth*0.16)*env);
+// Color varies from pure white at top, to blue-purple at branches
+const r=depth===0?200:(80+depth*15);
+const g=depth===0?220:(110+depth*10);
+const blue=255;
+
+// Wide soft glow pass
 lctx.beginPath();lctx.moveTo(pts[0].x,pts[0].y);
-for(let i=1;i<pts.length;i++) lctx.lineTo(pts[i].x,pts[i].y);
-const alpha=Math.max(0,(0.9-depth*0.14)*env);
-const r=60+Math.floor(Math.random()*40);
-const g=100+Math.floor(Math.random()*60);
-const blue=220+Math.floor(Math.random()*35);
-lctx.strokeStyle=`rgba(${r},${g},${blue},${alpha*0.4})`;
-lctx.lineWidth=Math.max(2,(9-depth*1.5));
+pts.slice(1).forEach(p=>lctx.lineTo(p.x,p.y));
+lctx.strokeStyle=`rgba(${r},${g},${blue},${alpha*0.28})`;
+lctx.lineWidth=Math.max(3,12-depth*2);
 lctx.shadowBlur=0;lctx.stroke();
 
-// Core bright pass
+// Medium glow
 lctx.beginPath();lctx.moveTo(pts[0].x,pts[0].y);
-for(let i=1;i<pts.length;i++) lctx.lineTo(pts[i].x,pts[i].y);
-lctx.strokeStyle=`rgba(${r},${g},${blue},${alpha})`;
-lctx.lineWidth=Math.max(0.5,(4-depth*0.8));
-lctx.shadowBlur=30+Math.random()*20;
-lctx.shadowColor=`rgba(80,160,255,${0.95*env})`;
+pts.slice(1).forEach(p=>lctx.lineTo(p.x,p.y));
+lctx.strokeStyle=`rgba(${r},${g},${blue},${alpha*0.55})`;
+lctx.lineWidth=Math.max(1.5,6-depth*1.2);
+lctx.shadowBlur=depth===0?40:20;
+lctx.shadowColor=`rgba(100,180,255,${0.9*env})`;
 lctx.stroke();
 
-// White hot core for top-level bolts
+// Bright core
+lctx.beginPath();lctx.moveTo(pts[0].x,pts[0].y);
+pts.slice(1).forEach(p=>lctx.lineTo(p.x,p.y));
+lctx.strokeStyle=`rgba(${r},${g},${blue},${alpha})`;
+lctx.lineWidth=Math.max(0.4,2.5-depth*0.55);
+lctx.shadowBlur=depth<2?25:10;
+lctx.stroke();
+
+// White-hot filament at top two levels
 if(depth<2){
   lctx.beginPath();lctx.moveTo(pts[0].x,pts[0].y);
-  for(let i=1;i<pts.length;i++) lctx.lineTo(pts[i].x,pts[i].y);
-  lctx.strokeStyle=`rgba(220,235,255,${alpha*0.7})`;
-  lctx.lineWidth=Math.max(0.3,1.5-depth*0.5);
-  lctx.shadowBlur=8;lctx.stroke();
+  pts.slice(1).forEach(p=>lctx.lineTo(p.x,p.y));
+  lctx.strokeStyle=`rgba(240,248,255,${alpha*0.85})`;
+  lctx.lineWidth=Math.max(0.2,0.9-depth*0.4);
+  lctx.shadowBlur=4;lctx.stroke();
 }
 
 lctx.shadowBlur=0;
 
-// Branches — multiple per segment for realism
+// Branches — realistic tapering count per depth
+const branchProb = [0.75,0.5,0.35,0.2,0.1][depth]||0;
 for(let i=1;i<pts.length-1;i++){
-  if(depth<4&&Math.random()>0.55){
-    const branchLen=0.3+Math.random()*0.5;
-    const bx=pts[i].x+(Math.random()-.5)*(200-depth*30);
-    const by=pts[i].y+Math.random()*(y2-pts[i].y)*branchLen;
-    _drawBolt(pts[i].x,pts[i].y,bx,by,depth+1+(depth>1?1:0),env*0.7);
+  if(Math.random()<branchProb){
+    const t=(i/pts.length);
+    const branchLen=(0.2+Math.random()*0.5)*(1-t*0.5);
+    const side=Math.random()>.5?1:-1;
+    const bx=pts[i].x+side*(80-depth*15+Math.random()*60);
+    const by=pts[i].y+(y2-pts[i].y)*branchLen+(Math.random()-.5)*30;
+    _drawBolt(pts[i].x,pts[i].y,bx,by,depth+1,env*0.65);
   }
 }
 
-// Impact glow at end point
-if(depth===0&&Math.random()>0.4){
-  const grd2=lctx.createRadialGradient(x2,y2,0,x2,y2,40+Math.random()*30);
-  grd2.addColorStop(0,`rgba(180,220,255,${0.5*env})`);
-  grd2.addColorStop(0.3,`rgba(80,140,255,${0.2*env})`);
-  grd2.addColorStop(1,'rgba(0,0,0,0)');
-  lctx.fillStyle=grd2;
-  lctx.beginPath();lctx.arc(x2,y2,50+Math.random()*20,0,Math.PI*2);lctx.fill();
+// Ground strike flash at endpoint of primary bolts
+if(depth===0&&Math.random()>0.3){
+  const r2=lctx.createRadialGradient(x2,y2,0,x2,y2,35+Math.random()*25);
+  r2.addColorStop(0,`rgba(220,235,255,${0.65*env})`);
+  r2.addColorStop(0.4,`rgba(100,170,255,${0.25*env})`);
+  r2.addColorStop(1,'rgba(0,0,0,0)');
+  lctx.fillStyle=r2;
+  lctx.beginPath();lctx.arc(x2,y2,40+Math.random()*15,0,Math.PI*2);lctx.fill();
 }
-
 }
 
  
@@ -3189,7 +3229,7 @@ if(monthTabBtn)switchTab('monthly',monthTabBtn);
 
 const p=pal(winName);
 
-doScreenFlash(p.bar);shakePage();launchParticles(p.bar,p.rg,150);
+doScreenFlash(p.bar);shakePage();launchParticles(p.bar,p.rg,80);
 
 if(newStreak>=6)launchLightning();
 
@@ -3742,6 +3782,14 @@ _flameShown.clear();setupFlameObserver();
  
 
 render();
+
+// Initialize banner icons for Mom/Dad and undo button states
+function initBannerIcons(){
+  const momEl=document.getElementById('banner-mom-icon');
+  if(momEl) momEl.innerHTML=manaIcon('Mom',14);
+}
+initBannerIcons();
+updateSecretUndoPreview();
 
 /* ═══ STATS SNAPSHOT ═════════════════════════════════════ */
 
