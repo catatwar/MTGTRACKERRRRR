@@ -1,292 +1,4 @@
 <html lang="en"><head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-      (function() {
-        const originalConsole = window.console;
-        window.console = {
-          log: (...args) => {
-            originalConsole.log(...args);
-            window.parent.postMessage({ type: 'console', message: args.join(' ') }, '*');
-          },
-          error: (...args) => {
-            originalConsole.error(...args);
-            window.parent.postMessage({ type: 'console', message: 'Error: ' + args.join(' ') }, '*');
-          },
-          warn: (...args) => {
-            originalConsole.warn(...args);
-            window.parent.postMessage({ type: 'console', message: 'Warning: ' + args.join(' ') }, '*');
-          }
-        };
-
-        let requestId = 0;
-        let callbacksMap = new Map();
-        let streamControllers = new Map();
-        
-        window.claude = {
-          complete: (prompt) => {
-            return new Promise((resolve, reject) => {
-              const id = requestId++;
-              callbacksMap.set(id, { resolve, reject });
-              window.parent.postMessage({ type: 'claudeComplete', id, prompt }, '*');
-            });
-          }
-        };
-
-        window.storage = {
-          get: (key, shared = false) => {
-            return new Promise((resolve, reject) => {
-              const id = requestId++;
-              callbacksMap.set(id, { resolve, reject });
-              window.parent.postMessage({ type: 'storageGet', id, key, shared }, '*');
-            });
-          },
-          set: (key, value, shared = false) => {
-            return new Promise((resolve, reject) => {
-              const id = requestId++;
-              callbacksMap.set(id, { resolve, reject });
-              window.parent.postMessage({ type: 'storageSet', id, key, value, shared }, '*');
-            });
-          },
-          delete: (key, shared = false) => {
-            return new Promise((resolve, reject) => {
-              const id = requestId++;
-              callbacksMap.set(id, { resolve, reject });
-              window.parent.postMessage({ type: 'storageDelete', id, key, shared }, '*');
-            });
-          },
-          list: (prefix, shared = false) => {
-            return new Promise((resolve, reject) => {
-              const id = requestId++;
-              callbacksMap.set(id, { resolve, reject });
-              window.parent.postMessage({ type: 'storageList', id, prefix, shared }, '*');
-            });
-          }
-        };
-
-        let pendingBlobs = new Map();
-        URL.createObjectURL = (blob) => {
-          // Store the blob and create an ID and URL for it
-          const blobId = `blob-${Date.now()}-${Math.random()}`;
-          pendingBlobs.set(blobId, blob);
-          return `blob-request://${blobId}`;
-        };
-
-        URL.revokeObjectURL = (url) => {
-          // Remove the blob from our store
-          const blobId = url.replace("blob-request://", "");
-          pendingBlobs.delete(blobId);
-        };
-
-        const getBlobFromURL = (url) => {
-          const blobId = url.replace("blob-request://", "");
-          return pendingBlobs.get(blobId);
-        };
-
-        // Override global fetch with streaming support
-        window.fetch = (url, init = {}) => {
-          return new Promise((resolve, reject) => {
-            const id = requestId++;
-            const channelId = `fetch-${id}-${Date.now()}`;
-            
-            callbacksMap.set(id, { 
-              resolve: (response) => {
-                // Create a ReadableStream for the response body
-                const stream = new ReadableStream({
-                  start(controller) {
-                    streamControllers.set(channelId, controller);
-                  },
-                  cancel() {
-                    streamControllers.delete(channelId);
-                  }
-                });
-                
-                // Create and return the Response with the stream
-                resolve(new Response(stream, {
-                  status: response.status,
-                  statusText: response.statusText,
-                  headers: response.headers
-                }));
-              },
-              reject,
-              channelId
-            });
-            
-            window.parent.postMessage({
-              type: 'proxyFetch',
-              id,
-              url,
-              init,
-              channelId
-            }, '*');
-          });
-        };
-
-        window.addEventListener('message', async (event) => {
-          if (event.data.type === 'takeScreenshot') {
-            const rootElement = document.getElementById('artifacts-component-root-html');
-            if (!rootElement) {
-              window.parent.postMessage({
-                type: 'screenshotError',
-                error: new Error('Root element not found'),
-              }, '*');
-            }
-            const screenshot = await htmlToImage.toPng(rootElement, {
-              imagePlaceholder:
-                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjePDgwX8ACOQDoNsk0PMAAAAASUVORK5CYII=",
-            });
-            window.parent.postMessage({
-              type: 'screenshotData',
-              data: screenshot,
-            }, '*');
-          } else if (event.data.type === 'claudeComplete') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-            } else {
-              callback.resolve(event.data.completion);
-            }
-            callbacksMap.delete(event.data.id);
-          } else if (event.data.type === 'proxyFetchResponse') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-              callbacksMap.delete(event.data.id);
-            } else {
-              // Initial response with headers, status, etc.
-              callback.resolve({
-                status: event.data.status,
-                statusText: event.data.statusText,
-                headers: event.data.headers
-              });
-              // Don't delete the callback yet if streaming
-              if (!event.data.body) {
-                callbacksMap.delete(event.data.id);
-              }
-            }
-          } else if (event.data.type === 'proxyFetchStream') {
-            // Handle streaming data chunks
-            const controller = streamControllers.get(event.data.channelId);
-            if (controller) {
-              if (event.data.error) {
-                controller.error(new Error(event.data.error));
-                streamControllers.delete(event.data.channelId);
-              } else if (event.data.done) {
-                controller.close();
-                streamControllers.delete(event.data.channelId);
-                // Clean up the callback
-                const callback = Array.from(callbacksMap.entries()).find(
-                  ([_, value]) => value.channelId === event.data.channelId
-                );
-                if (callback) {
-                  callbacksMap.delete(callback[0]);
-                }
-              } else if (event.data.chunk) {
-                controller.enqueue(new Uint8Array(event.data.chunk));
-              }
-            }
-          } else if (event.data.type === 'storageGet') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-            } else {
-              callback.resolve(event.data.result);
-            }
-            callbacksMap.delete(event.data.id);
-          } else if (event.data.type === 'storageSet') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-            } else {
-              callback.resolve(event.data.result);
-            }
-            callbacksMap.delete(event.data.id);
-          } else if (event.data.type === 'storageDelete') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-            } else {
-              callback.resolve(event.data.result);
-            }
-            callbacksMap.delete(event.data.id);
-          } else if (event.data.type === 'storageList') {
-            const callback = callbacksMap.get(event.data.id);
-            if (event.data.error) {
-              callback.reject(new Error(event.data.error));
-            } else {
-              callback.resolve(event.data.result);
-            }
-            callbacksMap.delete(event.data.id);
-          }
-        });
-
-        window.addEventListener('click', (event) => {
-          const isEl = event.target instanceof HTMLElement;
-          if (!isEl) return;
-    
-          // find ancestor links
-          const linkEl = event.target.closest("a");
-          if (!linkEl || !linkEl.href) return;
-    
-          event.preventDefault();
-          event.stopImmediatePropagation();
-    
-          if (linkEl.href.startsWith("blob-request:")) {
-            const blob = getBlobFromURL(linkEl.href);
-            if (!blob) return;
-            void blob.arrayBuffer().then((data) => {
-              window.parent.postMessage({
-                type: "downloadFile",
-                filename: linkEl.download,
-                data,
-                mimeType: blob.type || "application/octet-stream",
-              });
-            });
-          } else if (linkEl.href.startsWith("data:")) {
-            const [header, base64Data] = linkEl.href.split(",");
-            const mimeMatch = header.match(/data:([^;]+)/);
-            const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
-            const binaryString = atob(base64Data);
-            const data = Uint8Array.from(binaryString, (c) =>
-              c.charCodeAt(0),
-            ).buffer;
-            window.parent.postMessage({
-              type: "downloadFile",
-              filename: linkEl.download,
-              data,
-              mimeType,
-            });
-          } else {
-            let linkUrl;
-            try {
-              linkUrl = new URL(linkEl.href);
-            } catch (error) {
-              return;
-            }
-    
-            if (linkUrl.hostname === window.location.hostname) return;
-      
-            window.parent.postMessage({
-              type: 'openExternal',
-              href: linkEl.href,
-            }, '*');
-          }
-      });
-
-        const originalOpen = window.open;
-        window.open = function (url) {
-          window.parent.postMessage({
-            type: "openExternal",
-            href: url,
-          }, "*");
-        };
-
-        window.addEventListener('error', (event) => {
-          window.parent.postMessage({ type: 'console', message: 'Uncaught Error: ' + event.message }, '*');
-        });
-      })();
-    </script>
-  
-
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1114,6 +826,16 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 <link rel="stylesheet" href="chrome-extension://a5687425-ea9f-48cb-bc33-9f1260157c17/app/content-style.css"></head>
 
 <body id="artifacts-component-root-html" class="">
+<div id="interaction-lockout"></div>
+<script>
+(function(){
+  var lockout = document.getElementById('interaction-lockout');
+  if(lockout){
+    setTimeout(function(){ lockout.parentNode.removeChild(lockout); }, 1000);
+  }
+})();
+</script>
+
 
 <canvas id="particle-canvas" width="934" height="714" class=""></canvas>
 
@@ -1252,8 +974,8 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
         style="width:140px;height:140px;border-radius:50%;border:2px solid rgba(180,30,30,.5);background:linear-gradient(160deg,#3a0a0a,#200505);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;-webkit-tap-highlight-color:transparent;touch-action:none;position:relative;z-index:1;"
         onpointerdown="raHoldStart(event)" onpointerup="raHoldEnd()" onpointerleave="raHoldEnd()" oncontextmenu="return false">
         <span style="font-size:28px;pointer-events:none;">💀</span>
-        <span id="ra-hold-label" style="font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#cc3030;letter-spacing:.06em;pointer-events:none;line-height:1.3;text-align:center;">HOLD TO<br>DELETE ALL</span>
-        <span id="ra-hold-timer" style="font-family:'Cinzel Decorative',serif;font-size:18px;font-weight:700;color:#ff4040;pointer-events:none;display:none;text-shadow:0 0 12px rgba(255,40,40,.8);">10</span>
+        <span id="ra-hold-label" style="font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#cc3030;letter-spacing:.06em;pointer-events:none;line-height:1.3;text-align:center;position:absolute;">HOLD TO<br>DELETE ALL</span>
+        <span id="ra-hold-timer" style="font-family:'Cinzel Decorative',serif;font-size:18px;font-weight:700;color:#ff4040;pointer-events:none;visibility:hidden;text-shadow:0 0 12px rgba(255,40,40,.8);position:absolute;">10</span>
       </button>
     </div>
 
@@ -2113,7 +1835,17 @@ const closeM=id=>$(id).classList.remove('open');
 
 function resetMonth(){DOM.m1Month.textContent=mn();openM('m1')}
 
-function doReset(){const before=_captureState();S.mW={};S.mL={};S.players.forEach(n=>ensurePlayer(S,n));_pushUndo('monthly reset',before);save();render()}
+function doReset(){
+  const before=_captureState();
+  S.mW={};S.mL={};
+  S.players.forEach(n=>ensurePlayer(S,n));
+  _pushUndo('monthly reset',before);
+  save();render();
+  setTimeout(()=>{
+    const monthTabBtn=document.querySelector('.tab[onclick*="monthly"]');
+    if(monthTabBtn)switchTab('monthly',monthTabBtn);
+  },50);
+}
 
 // Ensure a month-start snapshot exists (for states that pre-date this feature)
 function ensureMonthStartSnapshot(){
@@ -2147,6 +1879,10 @@ _preResetBackup=JSON.parse(JSON.stringify(S));
 _actionsSinceReset=0;
 S=defState();save();render();
 _pushUndo('Reset Everything', before);
+setTimeout(()=>{
+  const monthTabBtn=document.querySelector('.tab[onclick*="monthly"]');
+  if(monthTabBtn)switchTab('monthly',monthTabBtn);
+},100);
 }
 
 /* ═══ HOLD-TO-RESET EVERYTHING ═════════════════════════ */
@@ -2193,8 +1929,8 @@ _pushUndo('Reset Everything', before);
   function resetRing(){
     const arc = el('ra-ring-arc');
     if(arc){ arc.style.transition='none'; arc.setAttribute('stroke-dashoffset','377'); arc.style.stroke='#cc2020'; }
-    const lbl = el('ra-hold-label'); if(lbl) lbl.style.display='';
-    const tmr = el('ra-hold-timer'); if(tmr) tmr.style.display='none';
+    const lbl = el('ra-hold-label'); if(lbl) lbl.style.visibility='';
+    const tmr = el('ra-hold-timer'); if(tmr) tmr.style.visibility='hidden';
   }
 
   // ── public API ────────────────────────────────────────
@@ -2267,9 +2003,9 @@ _pushUndo('Reset Everything', before);
     const lbl = el('ra-hold-label');
     const tmr = el('ra-hold-timer');
     if(progress > 0.05){
-      if(lbl) lbl.style.display = 'none';
+      if(lbl) lbl.style.visibility = 'hidden';
       if(tmr){
-        tmr.style.display = '';
+        tmr.style.visibility = 'visible';
         const secs = Math.ceil((HOLD_MS - elapsed) / 1000);
         tmr.textContent = Math.max(0, secs);
       }
