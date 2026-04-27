@@ -2652,9 +2652,9 @@ box.innerHTML=`<div class="t-ext-fire">💨</div><div class="t-ext-who">${ESC(br
 
 const isGod=streak>=6;
 
-const icon=streak>=6?'⚡☁️⚡':streak>=5?'🌀🔥🌀':streak>=4?'💫🔥💫':streak>=3?'✨🔥✨':'🔥';
+const icon=streak>=6?'👑':streak>=5?'🌀🔥🌀':streak>=4?'💫🔥💫':streak>=3?'✨🔥✨':'🔥';
 
-const sub=streak>=6?'⚡ GOD MODE ⚡':streak>=4?'Unstoppable!!':streak>=3?'Can anyone stop them?':'Nice streak!';
+const sub=streak>=6?'GOD MODE':streak>=4?'Unstoppable!!':streak>=3?'Can anyone stop them?':'Nice streak!';
 
 box.className=`toast-box toast-streak${isGod?' godmode':''}`;
 
@@ -2991,7 +2991,7 @@ const p=pal(winName);
 
 doScreenFlash(p.bar);shakePage();launchParticles(p.bar,p.rg,80);
 
-if(newStreak>=6)launchLightning();
+
 
 requestAnimationFrame(()=>{
 
@@ -3233,7 +3233,7 @@ DOM.lbContent.innerHTML=buildLeaderboard(S.players,S.aW,S.aL,'All Time',true);
 
 /* ═══ STREAK BADGE ════════════════════════════════════ */
 
-function streakIcon(v){if(v>=6)return'⚡☁️⚡';if(v>=5)return'🌀🔥🌀';if(v>=4)return'💫🔥💫';if(v>=3)return'✨🔥✨';return'🔥'}
+function streakIcon(v){if(v>=6)return'👑';if(v>=5)return'🌀🔥🌀';if(v>=4)return'💫🔥💫';if(v>=3)return'✨🔥✨';return'🔥'}
 
  
 
@@ -3647,10 +3647,10 @@ ct.innerHTML=`
 
 <!-- HOT STREAK — only when active -->
 ${topStreak>=2?`<div style="background:linear-gradient(135deg,rgba(255,128,64,.12),rgba(255,60,0,.06));border:1px solid rgba(255,100,40,.3);border-radius:8px;padding:6px 10px;margin-bottom:7px;display:flex;align-items:center;gap:8px;">
-  <div style="font-size:17px;line-height:1">${topStreak>=6?'⚡':'🔥'}</div>
+  <div style="font-size:17px;line-height:1">${topStreak>=6?'👑':'🔥'}</div>
   <div>
     <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${topStreak>=6?'#ffe060':'#ff8040'};line-height:1.2">${ESC(streakLeader)} ${topStreak>=6?'IS IN GOD MODE':'is on fire'}</div>
-    <div style="font-size:10px;color:#8a7050">${topStreak} win streak${topStreak>=6?' ⚡ Unstoppable ⚡':''}</div>
+    <div style="font-size:10px;color:#8a7050">${topStreak} win streak${topStreak>=6?' Unstoppable':''}</div>
   </div>
 </div>`:''}
 
