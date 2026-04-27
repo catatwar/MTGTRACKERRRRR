@@ -153,8 +153,13 @@ font-family:'Cinzel',serif;font-size:11px;font-weight:600;cursor:pointer;margin-
 
 .secret-btn.danger:hover{background:rgba(200,60,60,.1);border-color:rgba(200,60,60,.5)}
 
-#revert-undo-btn:not([disabled]){opacity:1!important;border-color:rgba(212,168,67,.4);color:var(--gold);}
-#revert-undo-btn:not([disabled]):hover{background:rgba(212,168,67,.12);border-color:rgba(212,168,67,.6);}
+#coin-flip-btn:hover{background:linear-gradient(160deg,#2a2814,#1c1a0e);border-color:rgba(212,168,67,.5);box-shadow:0 4px 20px rgba(212,168,67,.1);}
+#coin-flip-btn:active{transform:scale(.97);}
+#coin-flip-overlay.open{display:flex!important;}
+@keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(1800deg)}}
+@keyframes coinResult{0%{transform:scale(1)}40%{transform:scale(1.12)}70%{transform:scale(.97)}100%{transform:scale(1)}}
+@keyframes coinGlowPulse{0%,100%{opacity:.3;transform:scale(.95)}50%{opacity:.7;transform:scale(1.05)}}
+
 
 /* SETTINGS SECTIONS */
 .settings-section{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px;margin-bottom:10px;position:relative;overflow:hidden;}
@@ -1269,6 +1274,60 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 </div></div></div>
 
+<!-- COIN FLIP BUTTON -->
+<button id="coin-flip-btn" onclick="openCoinFlip()" style="width:100%;margin-bottom:16px;padding:11px 16px;border-radius:12px;border:1px solid rgba(212,168,67,.3);background:linear-gradient(160deg,#1e1c10,#14120a);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;box-shadow:0 2px 12px rgba(0,0,0,.4);">
+  <span style="font-size:18px">🪙</span> FLIP A COIN
+</button>
+</div>
+
+<!-- COIN FLIP OVERLAY -->
+<div id="coin-flip-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;flex-direction:column;">
+  <div id="coin-flip-inner" style="background:linear-gradient(160deg,#1a1610,#12100a);border:1px solid var(--border2);border-radius:20px;padding:28px 22px 24px;max-width:340px;width:100%;text-align:center;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.9);">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-dim),var(--gold),var(--gold-dim),transparent);"></div>
+    <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:16px;">⚔ COIN FLIP ⚔</div>
+
+    <!-- Player selector -->
+    <div id="coin-player-select" style="margin-bottom:18px;">
+      <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;">Select Players to Include</div>
+      <div id="coin-player-btns" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;"></div>
+    </div>
+
+    <!-- Coin arena -->
+    <div style="position:relative;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+      <!-- Glow ring beneath coin -->
+      <div id="coin-glow" style="position:absolute;width:120px;height:120px;border-radius:50%;opacity:0;transition:opacity .3s;pointer-events:none;"></div>
+      <!-- The 3D coin -->
+      <div id="coin-scene" style="width:110px;height:110px;perspective:400px;cursor:pointer;" onclick="doFlipCoin()">
+        <div id="coin-3d" style="width:110px;height:110px;position:relative;transform-style:preserve-3d;transform:rotateY(0deg);transition:transform .05s linear;">
+          <!-- Heads face -->
+          <div id="coin-face-h" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid rgba(212,168,67,.5);box-shadow:inset 0 2px 8px rgba(0,0,0,.5),0 0 20px rgba(212,168,67,.15);">
+            <div id="coin-face-h-bg" style="position:absolute;inset:0;border-radius:50%;"></div>
+            <div id="coin-face-h-icon" style="position:relative;z-index:1;"></div>
+            <div id="coin-face-h-name" style="position:absolute;bottom:8px;left:0;right:0;font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.9);"></div>
+          </div>
+          <!-- Tails face -->
+          <div id="coin-face-t" style="position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid rgba(212,168,67,.5);box-shadow:inset 0 2px 8px rgba(0,0,0,.5),0 0 20px rgba(212,168,67,.15);">
+            <div id="coin-face-t-bg" style="position:absolute;inset:0;border-radius:50%;"></div>
+            <div id="coin-face-t-icon" style="position:relative;z-index:1;"></div>
+            <div id="coin-face-t-name" style="position:absolute;bottom:8px;left:0;right:0;font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.9);"></div>
+          </div>
+          <!-- Coin edge (thin middle band) -->
+          <div style="position:absolute;left:50%;top:0;bottom:0;transform:translateX(-50%);width:6px;background:linear-gradient(180deg,#b8920a,#f0c840,#d4a020,#f0c840,#b8920a);border-radius:2px;pointer-events:none;opacity:0;" id="coin-edge"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result display -->
+    <div id="coin-result" style="min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:16px;">
+      <div id="coin-result-text" style="font-family:'Cinzel Decorative',serif;font-size:18px;font-weight:700;letter-spacing:.04em;opacity:0;transition:opacity .3s;"></div>
+      <div id="coin-result-sub" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx3);letter-spacing:.08em;margin-top:4px;opacity:0;transition:opacity .3s;"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button onclick="doFlipCoin()" id="coin-flip-action-btn" style="flex:1;padding:10px;border-radius:9px;border:1px solid rgba(212,168,67,.4);background:linear-gradient(135deg,#2a2010,#1a1508);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;transition:all .15s;">🪙 Flip</button>
+      <button onclick="closeCoinFlip()" style="padding:10px 16px;border-radius:9px;border:1px solid var(--border2);background:transparent;color:var(--tx3);font-family:'Cinzel',serif;font-size:10px;cursor:pointer;transition:all .15s;">✕</button>
+    </div>
+  </div>
 </div>
 
  
@@ -1855,32 +1914,40 @@ setTimeout(()=>{
   // ── helpers ──────────────────────────────────────────
   function el(id){ return document.getElementById(id); }
 
+  function _raInner(){ return document.querySelector('#m-ra-hold > div'); }
+
   function setBodyShake(amp){
-    // amp 0–1; apply a random jitter scaled by amp
-    if(amp <= 0){ document.getElementById('shake-wrapper').style.transform = ''; return; }
-    const a = amp * amp; // ease-in curve for more dramatic ramp
-    const tx = (Math.random()*2-1) * a * 28;
-    const ty = (Math.random()*2-1) * a * 18;
+    // Shake the visible modal inner card — shake-wrapper is invisible behind the overlay
+    const inner = _raInner();
+    if(!inner) return;
+    if(amp <= 0){ inner.style.transform = ''; return; }
+    const a = amp * amp;
+    const tx = (Math.random()*2-1) * a * 18;
+    const ty = (Math.random()*2-1) * a * 10;
     const rz = (Math.random()*2-1) * a * 3.5;
-    document.getElementById('shake-wrapper').style.transform = `translate(${tx}px,${ty}px) rotate(${rz}deg)`;
+    inner.style.transform = `translate(${tx}px,${ty}px) rotate(${rz}deg)`;
   }
 
   function clearShake(){
     cancelAnimationFrame(_shakeRafId);
-    document.getElementById('shake-wrapper').style.transition = 'transform 0.4s cubic-bezier(.22,1,.36,1)';
+    const inner = _raInner();
+    if(inner){
+      inner.style.transition = 'transform 0.4s cubic-bezier(.22,1,.36,1)';
+      inner.style.transform = '';
+      setTimeout(()=>{ if(inner) inner.style.transition = ''; }, 420);
+    }
     document.getElementById('shake-wrapper').style.transform = '';
-    setTimeout(()=>{ document.getElementById('shake-wrapper').style.transition = ''; }, 420);
   }
 
   function decayShake(){
     if(_shakeDecayStart === null) _shakeDecayStart = performance.now();
     const elapsed = performance.now() - _shakeDecayStart;
-    const decayDuration = 600 + _shakeAmplitude * 600; // longer decay the harder it was shaking
+    const decayDuration = 600 + _shakeAmplitude * 600;
     const t = Math.min(elapsed / decayDuration, 1);
-    const eased = 1 - t * t * (3 - 2 * t); // smoothstep out
+    const eased = 1 - t * t * (3 - 2 * t);
     setBodyShake(_shakeAmplitude * eased);
     if(t < 1){ _shakeRafId = requestAnimationFrame(decayShake); }
-    else { document.getElementById('shake-wrapper').style.transform = ''; }
+    else { const inner = _raInner(); if(inner) inner.style.transform = ''; }
   }
 
   function resetRing(){
@@ -1912,7 +1979,7 @@ setTimeout(()=>{
       cancelAnimationFrame(_shakeRafId);
       decayShake();
     } else {
-      document.getElementById('shake-wrapper').style.transform = '';
+      const inner = _raInner(); if(inner) inner.style.transform = '';
     }
   };
 
@@ -1977,7 +2044,7 @@ setTimeout(()=>{
     if(progress >= 1){
       // ── DONE — white flash then execute ──────────────
       _holding = false;
-      document.getElementById('shake-wrapper').style.transform = '';
+      const inner2 = _raInner(); if(inner2) inner2.style.transform = '';
       el('m-ra-hold').style.display = 'none';
       resetRing();
 
@@ -3678,6 +3745,239 @@ function closeStatsSnapshot(){
   $('stats-snapshot-overlay').style.display='none';
   document.body.style.overflow='';
 }
+
+/* ═══ COIN FLIP ══════════════════════════════════════════ */
+(function(){
+  let _coinSelected = [];
+  let _coinFlipping = false;
+  let _coinRafId = null;
+  let _coinAngle = 0;
+  let _coinWinner = null;
+  let _coinHeadPlayer = null;
+  let _coinTailPlayer = null;
+  // For the shuffle effect: track when we last swapped a face
+  let _lastFaceSwapTime = 0;
+
+  window.openCoinFlip = function(){
+    cancelAnimationFrame(_coinRafId);
+    _coinFlipping = false;
+    _coinAngle = 0;
+    _coinWinner = null;
+    _coinSelected = CFG.players.slice();
+    const ov = $('coin-flip-overlay');
+    ov.style.display = 'flex';
+    _buildPlayerBtns();
+    // Show first two selected players on faces to start
+    _coinHeadPlayer = _coinSelected[0];
+    _coinTailPlayer = _coinSelected[1] || _coinSelected[0];
+    _updateCoinFaces();
+    _clearResult();
+    _setCoinTransform(0, false);
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeCoinFlip = function(){
+    cancelAnimationFrame(_coinRafId);
+    _coinFlipping = false;
+    $('coin-flip-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  function _buildPlayerBtns(){
+    const cont = $('coin-player-btns');
+    cont.innerHTML = '';
+    CFG.players.forEach(p=>{
+      const pl = pal(p);
+      const on = _coinSelected.includes(p);
+      const btn = document.createElement('button');
+      btn.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;`
+        + `border:1.5px solid ${on ? pl.bar+'bb' : 'rgba(255,255,255,.08)'};`
+        + `background:${on ? pl.bg+'dd' : 'rgba(0,0,0,.25)'};`
+        + `color:${on ? pl.cl : '#5a4830'};`
+        + `font-family:'Cinzel',serif;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;`
+        + `opacity:${on?'1':'.55'};`;
+      btn.innerHTML = `<span style="pointer-events:none">${manaIcon(p,14)}</span>`
+        + `<span style="pointer-events:none">${ESC(p)}</span>`;
+      btn.onclick = ()=>_togglePlayer(p);
+      cont.appendChild(btn);
+    });
+    _updateFlipBtnState();
+  }
+
+  function _updateFlipBtnState(){
+    const btn = $('coin-flip-action-btn');
+    if(!btn) return;
+    const ok = _coinSelected.length >= 2;
+    btn.style.opacity = ok ? '1' : '0.4';
+    btn.style.cursor = ok ? 'pointer' : 'default';
+  }
+
+  function _togglePlayer(p){
+    if(_coinFlipping) return;
+    const idx = _coinSelected.indexOf(p);
+    if(idx >= 0){
+      if(_coinSelected.length <= 2) return;
+      _coinSelected.splice(idx, 1);
+    } else {
+      _coinSelected.push(p);
+    }
+    _buildPlayerBtns();
+    _coinHeadPlayer = _coinSelected[0];
+    _coinTailPlayer = _coinSelected[1] || _coinSelected[0];
+    _updateCoinFaces();
+    _clearResult();
+    _setCoinTransform(0, false);
+    _coinAngle = 0;
+  }
+
+  function _updateCoinFaces(){
+    _setFace('h', _coinHeadPlayer || CFG.players[0]);
+    _setFace('t', _coinTailPlayer || CFG.players[1]);
+  }
+
+  function _setFace(side, name){
+    const pl = pal(name);
+    const c = pl.bar;
+    const face = $('coin-face-'+side);
+    const icon = $('coin-face-'+side+'-icon');
+    const label = $('coin-face-'+side+'-name');
+    face.style.background = `radial-gradient(circle at 38% 32%, ${c}66, rgba(8,6,3,1) 82%)`;
+    face.style.borderColor = c + '99';
+    $('coin-face-'+side+'-bg').style.background =
+      `radial-gradient(circle at 38% 32%, ${c}44, transparent 70%)`;
+    icon.innerHTML = manaIcon(name, 44);
+    label.textContent = name.toUpperCase();
+    label.style.color = pl.cl;
+  }
+
+  function _setCoinTransform(angle, animated){
+    const c = $('coin-3d');
+    if(!c) return;
+    c.style.transition = animated ? '' : 'none';
+    c.style.transform = `rotateY(${angle}deg)`;
+  }
+
+  function _clearResult(){
+    _coinWinner = null;
+    $('coin-result-text').style.opacity = '0';
+    $('coin-result-sub').style.opacity = '0';
+    const glow = $('coin-glow');
+    glow.style.opacity = '0';
+    glow.style.animation = 'none';
+  }
+
+  // Returns a random player from the pool that isn't the one we just showed,
+  // so the cycling always visibly changes
+  let _lastShufflePlayer = null;
+  function _nextShufflePlayer(){
+    const pool = _coinSelected;
+    if(pool.length === 1) return pool[0];
+    let pick;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; }
+    while(pick === _lastShufflePlayer && pool.length > 1);
+    _lastShufflePlayer = pick;
+    return pick;
+  }
+
+  window.doFlipCoin = function(){
+    if(_coinFlipping) return;
+    if(_coinSelected.length < 2) return;
+
+    _clearResult();
+    _coinFlipping = true;
+    _lastFaceSwapTime = 0;
+    _lastShufflePlayer = null;
+
+    // Pick winner now but keep it secret until the end
+    _coinWinner = _coinSelected[Math.floor(Math.random() * _coinSelected.length)];
+
+    const duration = 1800 + Math.random() * 400; // total spin time ms
+    const fullSpins = 5 + Math.floor(Math.random() * 4);
+    const startAngle = _coinAngle;
+    // Winner always lands on heads face (angle = multiple of 360°)
+    const landingAngle = startAngle + fullSpins * 360;
+    const startTime = performance.now();
+
+    cancelAnimationFrame(_coinRafId);
+
+    function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+
+    function frame(now){
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const progress = easeOut(t);               // 0→1, decelerating
+      const speed = 1 - progress;                // 1→0, how fast we're spinning
+
+      // ── rotate the coin ──────────────────────────────
+      const angle = startAngle + (landingAngle - startAngle) * progress;
+      _coinAngle = angle;
+      const coinEl = $('coin-3d');
+      if(coinEl){ coinEl.style.transition = 'none'; coinEl.style.transform = `rotateY(${angle}deg)`; }
+
+      // ── shuffle face players ──────────────────────────
+      // Swap interval shrinks from ~60ms at full speed to ~400ms near the end.
+      // Below 5% speed, lock in the winner instead of shuffling.
+      const swapInterval = 60 + (1 - speed) * 340; // 60ms → 400ms
+      if(speed > 0.05){
+        if(_lastFaceSwapTime === 0 || (now - _lastFaceSwapTime) >= swapInterval){
+          _lastFaceSwapTime = now;
+          // Flip which face is currently front-facing based on angle
+          const normalised = ((angle % 360) + 360) % 360;
+          const frontFaceIsH = normalised < 90 || normalised >= 270;
+          const p = _nextShufflePlayer();
+          if(frontFaceIsH){ _coinHeadPlayer = p; _setFace('h', p); }
+          else             { _coinTailPlayer = p; _setFace('t', p); }
+        }
+      } else if(t < 1) {
+        // Final approach: lock winner onto heads face (landing face)
+        if(_coinHeadPlayer !== _coinWinner){
+          _coinHeadPlayer = _coinWinner;
+          _setFace('h', _coinWinner);
+        }
+      }
+
+      if(t < 1){
+        _coinRafId = requestAnimationFrame(frame);
+      } else {
+        // Snap: heads face shows the winner
+        _coinHeadPlayer = _coinWinner;
+        _setFace('h', _coinWinner);
+        _coinFlipping = false;
+        _showResult();
+      }
+    }
+
+    _coinRafId = requestAnimationFrame(frame);
+  };
+
+  function _showResult(){
+    if(!_coinWinner) return;
+    const pl = pal(_coinWinner);
+    const rt = $('coin-result-text');
+    const rs = $('coin-result-sub');
+    const glow = $('coin-glow');
+
+    rt.textContent = _coinWinner.toUpperCase() + ' WINS!';
+    rt.style.color = pl.cl;
+    rt.style.textShadow = `0 0 20px ${pl.bar}`;
+    rs.textContent = _coinSelected.length > 2
+      ? `Chosen from ${_coinSelected.length} players`
+      : '⬆ Heads';
+
+    requestAnimationFrame(()=>{
+      rt.style.opacity = '1';
+      rs.style.opacity = '1';
+      const c = $('coin-3d');
+      if(c){ c.style.animation = 'coinResult .5s cubic-bezier(.22,1,.36,1)'; setTimeout(()=>{ c.style.animation=''; }, 500); }
+    });
+
+    glow.style.animation = 'none';
+    glow.style.background = `radial-gradient(circle, ${pl.bar}99 0%, ${pl.bar}22 60%, transparent 80%)`;
+    void glow.offsetWidth;
+    glow.style.animation = 'coinGlowPulse 1.5s ease-in-out infinite';
+    glow.style.opacity = '0.7';
+  }
+})();
 
 </script>
 
