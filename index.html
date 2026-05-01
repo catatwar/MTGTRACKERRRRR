@@ -1881,8 +1881,24 @@ G:(sz)=>`<img src="data:image/webp;base64,UklGRlwZAABXRUJQVlA4TE8ZAAAvd8AdEFUDg7
 
 const PLAYER_MANA = ['U','W','R','G'];
 
+function playerHasPhoto(name){ return !!(S&&S.playerPhotos&&S.playerPhotos[name]); }
+
+function iconWrapStyle(name, bgStyle, borderStyle){
+  if(playerHasPhoto(name)){
+    // Use border-color:transparent to override CSS class border, keep same border-width for layout
+    const bw = borderStyle ? borderStyle.split(' ')[0] : '1px';
+    return `background:transparent;border-width:${bw};border-style:solid;border-color:transparent;padding:0;`;
+  }
+  let s = bgStyle ? `background:${bgStyle};` : '';
+  if(borderStyle) s += `border:${borderStyle};`;
+  return s;
+}
+
 function manaIcon(name,sz=28){
-  // Check custom icon
+  // Check custom photo (PFP)
+  if(S&&S.playerPhotos&&S.playerPhotos[name]){
+    return`<img src="${S.playerPhotos[name]}" style="width:${sz}px;height:${sz}px;min-width:${sz}px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0;">`;
+  }
   if(S&&S.playerIcons&&S.playerIcons[name]){
     const iconId=S.playerIcons[name];
     const ic=PLAYER_ICONS&&PLAYER_ICONS.find?PLAYER_ICONS.find(x=>x.id===iconId):null;
@@ -1934,7 +1950,7 @@ rewardsContent:$('rewards-content'),
 
 /* ═══ STATE ══════════════════════════════════════════ */
 
-function defState(){return{players:CFG.players.slice(),mW:{},mL:{},aW:{},aL:{},sk:{},log:[],month:ym(),rewardCounts:{},histMode:'recent',logTs:{},monthStartSnapshot:null,decks:{},playerIcons:{},customPalettes:{}}}
+function defState(){return{players:CFG.players.slice(),mW:{},mL:{},aW:{},aL:{},sk:{},log:[],month:ym(),rewardCounts:{},histMode:'recent',logTs:{},monthStartSnapshot:null,decks:{},playerIcons:{},customPalettes:{},playerPhotos:{}}}
 
 function migrateState(s){
 
@@ -1966,6 +1982,7 @@ if(!s.decks||typeof s.decks!=='object')s.decks={};
 // playerIcons and customPalettes for dynamic player management
 if(!s.playerIcons||typeof s.playerIcons!=='object')s.playerIcons={};
 if(!s.customPalettes||typeof s.customPalettes!=='object')s.customPalettes={};
+if(!s.playerPhotos||typeof s.playerPhotos!=='object')s.playerPhotos={};
 
 s.players.forEach(n=>ensurePlayer(s,n));
 
@@ -2064,7 +2081,7 @@ function doResetAll(){
 const before=_captureState();
 _preResetBackup=JSON.parse(JSON.stringify(S));
 _actionsSinceReset=0;
-const keptPlayers=S.players.slice();const keptIcons=JSON.parse(JSON.stringify(S.playerIcons||{}));const keptPalettes=JSON.parse(JSON.stringify(S.customPalettes||{}));const keptDecks=JSON.parse(JSON.stringify(S.decks||{}));S=defState();S.players=keptPlayers;S.playerIcons=keptIcons;S.customPalettes=keptPalettes;S.decks=keptDecks;S.players.forEach(n=>ensurePlayer(S,n));save();render();
+const keptPlayers=S.players.slice();const keptIcons=JSON.parse(JSON.stringify(S.playerIcons||{}));const keptPalettes=JSON.parse(JSON.stringify(S.customPalettes||{}));const keptDecks=JSON.parse(JSON.stringify(S.decks||{}));const keptPhotos=JSON.parse(JSON.stringify(S.playerPhotos||{}));S=defState();S.players=keptPlayers;S.playerIcons=keptIcons;S.customPalettes=keptPalettes;S.decks=keptDecks;S.playerPhotos=keptPhotos;S.players.forEach(n=>ensurePlayer(S,n));save();render();
 _pushUndo('Reset Everything', before);
 setTimeout(()=>{
   const monthTabBtn=document.querySelector('.tab[onclick*="monthly"]');
@@ -3026,7 +3043,7 @@ const pl=pal(p);const count=S.rewardCounts[p]||0;
 
 const items=Array.from({length:count},()=>`<div class="reward-item"><span class="reward-item-label">🏆 Month Champion Reward</span><button class="reward-pay-btn" onclick="payReward('${ESC(p)}')">Mark Paid</button></div>`).join('');
 
-return`<div class="reward-card"><div class="reward-player"><div class="reward-avatar" style="background:${pl.bg}">${manaIcon(p,26)}</div><div class="reward-name" style="color:${pl.cl}">${ESC(p)}</div><div class="reward-count" style="color:${pl.cl}">${count}×</div></div><div class="reward-list">${items}</div></div>`;
+return`<div class="reward-card"><div class="reward-player"><div class="reward-avatar" style="${iconWrapStyle(p,pl.bg,'1px solid var(--border2)') }">${manaIcon(p,playerHasPhoto(p)?42:26)}</div><div class="reward-name" style="color:${pl.cl}">${ESC(p)}</div><div class="reward-count" style="color:${pl.cl}">${count}×</div></div><div class="reward-list">${items}</div></div>`;
 
 }).join('')+'</div>';
 
@@ -3618,7 +3635,7 @@ return`<div class="lb-row ${rankClasses[i]||''}">
 
 <div class="lb-player">
 
-<div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:${pl.bg};border:1px solid ${pl.bar}44;flex-shrink:0">${manaIcon(p,24)}</div>
+<div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;${iconWrapStyle(p,pl.bg,`1px solid ${pl.bar}44`)}flex-shrink:0;overflow:hidden;">${manaIcon(p,playerHasPhoto(p)?32:24)}</div>
 
 <div>
 
@@ -3760,11 +3777,11 @@ ${S.sk[name]>=2?`<div class="cflame" id="cflame-${safeName}"></div>`:''}
 
 </div></div>
 
-<div class="card-art" style="background:${p.artBg}">
+<div class="card-art" style="background:${playerHasPhoto(name)?'transparent':p.artBg}">
 
-<div class="card-art-bg" style="background:radial-gradient(circle at 40% 40%,${p.bar}40,transparent)"></div>
+<div class="card-art-bg" style="background:${playerHasPhoto(name)?'none':`radial-gradient(circle at 40% 40%,${p.bar}40,transparent)`}"></div>
 
-<div class="card-art-inner" style="display:flex;align-items:center;justify-content:center">${manaIcon(name,44)}</div>
+<div class="card-art-inner" style="display:flex;align-items:center;justify-content:center">${playerHasPhoto(name)?`<img src="${S.playerPhotos[name]}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;">`:manaIcon(name,44)}</div>
 
 <div style="position:absolute;bottom:4px;right:4px;width:26px;height:26px;border-radius:50%;background:conic-gradient(${p.rg} ${pc*3.6}deg,rgba(0,0,0,.4) 0);padding:2px">
 
@@ -3947,7 +3964,7 @@ const expandContent=`<div class="expand-content" id="${expandId}">
 
 const expandBtn=`<button class="expand-btn" onclick="toggleExpand('${expandId}',this)">▸ Expand Stats</button>`;
 
-return`<div class="icard"><div class="irow"><div class="iav" style="background:${pl.bg}">${manaIcon(p,28)}</div><div><div class="iname">${ESC(p)}</div>${sk>=2?`<div style="font-family:'Cinzel',serif;font-size:10px;color:#ff8040;font-weight:700;letter-spacing:.04em">${streakIcon(sk)} ${sk} streak</div>`:''}${deckSummary}</div><div class="istats"><div class="ibig" style="color:${pl.cl}">${pct(aw,al)}%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:${pl.cl}">${aw}</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">${al}</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:${pl.cl}">${mw}</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">${ml}</div></div></div>${expandBtn}${expandContent}</div>`;
+return`<div class="icard"><div class="irow"><div class="iav" style="${iconWrapStyle(p,pl.bg,'1px solid var(--border2)') }">${manaIcon(p,playerHasPhoto(p)?42:28)}</div><div><div class="iname">${ESC(p)}</div>${sk>=2?`<div style="font-family:'Cinzel',serif;font-size:10px;color:#ff8040;font-weight:700;letter-spacing:.04em">${streakIcon(sk)} ${sk} streak</div>`:''}${deckSummary}</div><div class="istats"><div class="ibig" style="color:${pl.cl}">${pct(aw,al)}%</div><div class="isub">All-Time Win Rate</div></div></div><div class="dvd"></div><div class="atrow"><div class="atpill"><div class="atlbl">All-Time W</div><div class="atval" style="color:${pl.cl}">${aw}</div></div><div class="atpill"><div class="atlbl">All-Time L</div><div class="atval">${al}</div></div><div class="atpill"><div class="atlbl">Month W</div><div class="atval" style="color:${pl.cl}">${mw}</div></div><div class="atpill"><div class="atlbl">Month L</div><div class="atval">${ml}</div></div></div>${expandBtn}${expandContent}</div>`;
 
 }).join('');
 
@@ -4106,7 +4123,7 @@ function playerRow(p){
   return`<tr>
     <td style="padding:4px 5px;border-bottom:1px solid #2a2010;">
       <div style="display:flex;align-items:center;gap:5px;">
-        <div style="width:20px;height:20px;border-radius:50%;background:${pl.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${manaIcon(p,20)}</div>
+        <div style="width:20px;height:20px;border-radius:50%;${iconWrapStyle(p,pl.bg,null)}display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${manaIcon(p,playerHasPhoto(p)?20:20)}</div>
         <span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:${pl.cl}">${ESC(p)}</span>
       </div>
     </td>
@@ -4125,7 +4142,7 @@ const logRows=recentGames.slice(0,5).map(g=>{
   const pl=pal(g.winner);
   return`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #1a1510;">
     <span style="font-size:9px;color:#5a4428;font-family:'Cinzel',serif;min-width:38px">${ESC(g.date)}</span>
-    <div style="width:14px;height:14px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(g.winner,10)}</div>
+    <div style="width:14px;height:14px;border-radius:50%;${iconWrapStyle(g.winner,pl.bg,null)}flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(g.winner,10)}</div>
     <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl}">${ESC(g.winner)}</span>
     <span style="font-size:10px;color:#8a7050">won</span>
     ${(g.losers&&g.losers.length)?`<span style="font-size:9px;color:#5a4428">vs ${g.losers.map(ESC).join(', ')}</span>`:''}
@@ -4213,7 +4230,7 @@ ${topStreak>=2?`<div style="background:linear-gradient(135deg,rgba(255,128,64,.1
         const medals=['🥇','🥈','🥉','4️⃣'];
         return`<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:${i<mSorted.length-1?'1px solid #1a1510':'none'};">
           <span style="font-size:12px;width:16px;text-align:center;flex-shrink:0">${medals[i]||'·'}</span>
-          <div style="width:16px;height:16px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,10)}</div>
+          <div style="width:16px;height:16px;border-radius:50%;${iconWrapStyle(p,pl.bg,null)}flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,10)}</div>
           <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(p)}</span>
           <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex-shrink:0">${mw}W</span>
         </div>`;
@@ -4231,7 +4248,7 @@ ${topStreak>=2?`<div style="background:linear-gradient(135deg,rgba(255,128,64,.1
         const medals=['🥇','🥈','🥉','4️⃣'];
         return`<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:${i<atSorted.length-1?'1px solid #1a1510':'none'};">
           <span style="font-size:12px;width:16px;text-align:center;flex-shrink:0">${medals[i]||'·'}</span>
-          <div style="width:16px;height:16px;border-radius:50%;background:${pl.bg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,10)}</div>
+          <div style="width:16px;height:16px;border-radius:50%;${iconWrapStyle(p,pl.bg,null)}flex-shrink:0;display:flex;align-items:center;justify-content:center">${manaIcon(p,10)}</div>
           <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(p)}</span>
           <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:${pl.cl};flex-shrink:0">${aw}W</span>
         </div>`;
@@ -4505,6 +4522,25 @@ function closeStatsSnapshot(){
 
 let _mpEditingIdx = -1; // -1 = new player
 let _mpEditingIcon = null;
+let _mpEditingPhoto = null; // base64 string or null
+let _mpEditingColor = null; // hex color string or null (only used when photo is set)
+let _mpHasPhoto = false;
+
+// Extended color palette for when using a custom PFP
+const PHOTO_COLORS = [
+  {hex:'#4a9ae0',label:'Blue'},
+  {hex:'#50c060',label:'Green'},
+  {hex:'#e05050',label:'Red'},
+  {hex:'#e0a030',label:'Orange'},
+  {hex:'#d4a843',label:'Gold'},
+  {hex:'#c090e8',label:'Purple'},
+  {hex:'#e870b8',label:'Pink'},
+  {hex:'#f5f5f5',label:'White'},
+  {hex:'#60d0d0',label:'Cyan'},
+  {hex:'#e8e050',label:'Yellow'},
+  {hex:'#a0b8e0',label:'Frost'},
+  {hex:'#ff8060',label:'Coral'},
+];
 
 function openManagePlayers(){
   renderMPList();
@@ -4527,7 +4563,7 @@ function renderMPList(){
     const iconId = S.playerIcons ? S.playerIcons[p] : null;
     const iconHtml = manaIcon(p, 28);
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:10px;">
-      <div style="width:36px;height:36px;border-radius:50%;background:${pl.bg};border:1px solid ${pl.bar}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${iconHtml}</div>
+      <div style="width:36px;height:36px;border-radius:50%;${iconWrapStyle(p,pl.bg,`1px solid ${pl.bar}55`)}display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${playerHasPhoto(p)?manaIcon(p,36):iconHtml}</div>
       <div style="flex:1;font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:${pl.cl}">${ESC(p)}</div>
       <button onclick="openEditPlayer(${i})" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(212,168,67,.25);background:rgba(212,168,67,.07);color:var(--gold);font-family:'Cinzel',serif;font-size:9px;font-weight:600;cursor:pointer;letter-spacing:.03em;">Edit</button>
     </div>`;
@@ -4542,10 +4578,21 @@ function openEditPlayer(idx){
   document.getElementById('ep-title').textContent = isNew ? '＋ NEW PLAYER' : 'EDIT PLAYER';
   document.getElementById('ep-name-input').value = p || '';
   
+  // Photo state
+  _mpEditingPhoto = (p && S.playerPhotos && S.playerPhotos[p]) || null;
+  _mpHasPhoto = !!_mpEditingPhoto;
+  _mpEditingColor = null;
+  
+  // If player has a photo, try to pick a stored color from customPalettes
+  if(_mpHasPhoto && p && S.customPalettes && S.customPalettes[p]){
+    _mpEditingColor = S.customPalettes[p].cl || null;
+  }
+  
   // Icon selection
   const iconId = p && S.playerIcons ? (S.playerIcons[p]||null) : null;
   _mpEditingIcon = iconId || (p ? (CFG.players.indexOf(p) >= 0 ? ['U','W','R','G'][CFG.players.indexOf(p)] : 'G') : 'G');
   
+  renderEPPhotoSection();
   renderEPIconGrid();
   epRemoveCancel();
   
@@ -4564,17 +4611,99 @@ function closeEditPlayer(){
   document.getElementById('edit-player-overlay').style.display = 'none';
 }
 
+function renderEPPhotoSection(){
+  const wrap = document.getElementById('ep-photo-section');
+  if(!wrap) return;
+
+  const previewHtml = _mpHasPhoto
+    ? `<img src="${_mpEditingPhoto}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);display:block;flex-shrink:0;">`
+    : `<div style="width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.4);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">👤</div>`;
+
+  const removeBtn = _mpHasPhoto
+    ? `<button onclick="epRemovePhoto()" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(200,60,60,.3);background:transparent;color:#e06060;font-family:'Cinzel',serif;font-size:9px;font-weight:600;cursor:pointer;letter-spacing:.03em;margin-top:4px;">✕ Remove Photo</button>`
+    : '';
+
+  wrap.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Profile Photo</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      ${previewHtml}
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.07);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;font-weight:600;cursor:pointer;letter-spacing:.04em;">
+          📷 ${_mpHasPhoto ? 'Change Photo' : 'Upload Photo'}
+          <input type="file" accept="image/*" onchange="epHandlePhoto(this)" style="display:none;">
+        </label>
+        ${removeBtn}
+      </div>
+    </div>
+  `;
+}
+
+function epHandlePhoto(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Resize to max 200px for storage efficiency
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 200;
+      let w = img.width, h = img.height;
+      if(w > h){ if(w > MAX){h = Math.round(h*MAX/w);w=MAX;} } else { if(h > MAX){w = Math.round(w*MAX/h);h=MAX;} }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      _mpEditingPhoto = canvas.toDataURL('image/jpeg', 0.82);
+      _mpHasPhoto = true;
+      if(!_mpEditingColor) _mpEditingColor = PHOTO_COLORS[0].hex;
+      renderEPPhotoSection();
+      renderEPIconGrid();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function epRemovePhoto(){
+  _mpEditingPhoto = null;
+  _mpHasPhoto = false;
+  _mpEditingColor = null;
+  renderEPPhotoSection();
+  renderEPIconGrid();
+}
+
 function renderEPIconGrid(){
   const grid = document.getElementById('ep-icon-grid');
+  const labelEl = document.getElementById('ep-icon-label');
   if(!grid) return;
-  grid.innerHTML = PLAYER_ICONS.map(ic=>{
-    const sel = _mpEditingIcon === ic.id;
-    return `<button onclick="epSelectIcon('${ic.id}')" style="width:100%;aspect-ratio:1;border-radius:50%;border:2px solid ${sel?'var(--gold)':'transparent'};background:rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all .15s;${sel?'box-shadow:0 0 10px rgba(212,168,67,.4);':''}" title="${ic.label}">${ic.render(28)}</button>`;
-  }).join('');
+
+  if(_mpHasPhoto){
+    // Show color picker instead of icon grid
+    if(labelEl) labelEl.textContent = 'Player Color';
+    if(!_mpEditingColor) _mpEditingColor = PHOTO_COLORS[0].hex;
+    grid.style.gridTemplateColumns = 'repeat(6,1fr)';
+    grid.innerHTML = PHOTO_COLORS.map(c => {
+      const sel = _mpEditingColor === c.hex;
+      return `<button onclick="epSelectColor('${c.hex}')" title="${c.label}" style="width:100%;aspect-ratio:1;border-radius:50%;border:2px solid ${sel ? '#fff' : 'transparent'};background:${c.hex};cursor:pointer;transition:all .15s;box-shadow:${sel ? '0 0 0 2px var(--gold),0 0 10px rgba(212,168,67,.4)' : '0 1px 4px rgba(0,0,0,.5)'};"></button>`;
+    }).join('');
+  } else {
+    // Show mana icon grid as before
+    if(labelEl) labelEl.textContent = 'Icon (Color)';
+    grid.style.gridTemplateColumns = 'repeat(5,1fr)';
+    grid.innerHTML = PLAYER_ICONS.map(ic=>{
+      const sel = _mpEditingIcon === ic.id;
+      return `<button onclick="epSelectIcon('${ic.id}')" style="width:100%;aspect-ratio:1;border-radius:50%;border:2px solid ${sel?'var(--gold)':'transparent'};background:rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all .15s;${sel?'box-shadow:0 0 10px rgba(212,168,67,.4);':''}" title="${ic.label}">${ic.render(28)}</button>`;
+    }).join('');
+  }
 }
 
 function epSelectIcon(id){
   _mpEditingIcon = id;
+  renderEPIconGrid();
+}
+
+function epSelectColor(hex){
+  _mpEditingColor = hex;
   renderEPIconGrid();
 }
 
@@ -4587,33 +4716,50 @@ function epSave(){
   
   if(!S.playerIcons) S.playerIcons = {};
   if(!S.customPalettes) S.customPalettes = {};
+  if(!S.playerPhotos) S.playerPhotos = {};
+  
+  // Build the palette — if photo+color, build from chosen color; otherwise use icon palette
+  function buildPhotoPalette(hex){
+    return {cl:hex, bar:hex, rg:hex, bg:`radial-gradient(circle at 35% 35%,${hex}55,${hex}22)`, artBg:`linear-gradient(160deg,#1a1510,#110e08)`};
+  }
   
   if(isNew){
-    // Add new player
     if(S.players.includes(name)){ nameEl.value=''; return; }
     S.players.push(name);
     ensurePlayer(S, name);
-    S.playerIcons[name] = _mpEditingIcon || 'G';
-    // Set custom palette based on icon
-    const iconPal = ICON_PALETTES[_mpEditingIcon] || ICON_PALETTES.G;
-    S.customPalettes[name] = iconPal;
+    if(_mpHasPhoto && _mpEditingPhoto){
+      S.playerPhotos[name] = _mpEditingPhoto;
+      S.playerIcons[name] = 'G'; // fallback icon unused but stored
+      S.customPalettes[name] = buildPhotoPalette(_mpEditingColor || PHOTO_COLORS[0].hex);
+    } else {
+      S.playerIcons[name] = _mpEditingIcon || 'G';
+      const iconPal = ICON_PALETTES[_mpEditingIcon] || ICON_PALETTES.G;
+      S.customPalettes[name] = iconPal;
+      delete S.playerPhotos[name];
+    }
   } else {
     const oldName = S.players[_mpEditingIdx];
-    S.playerIcons[name] = _mpEditingIcon || S.playerIcons[oldName] || 'G';
-    const iconPal = ICON_PALETTES[_mpEditingIcon] || ICON_PALETTES.G;
+    let iconPal;
+    if(_mpHasPhoto && _mpEditingPhoto){
+      S.playerPhotos[name] = _mpEditingPhoto;
+      S.playerIcons[name] = 'G';
+      iconPal = buildPhotoPalette(_mpEditingColor || PHOTO_COLORS[0].hex);
+    } else {
+      S.playerIcons[name] = _mpEditingIcon || S.playerIcons[oldName] || 'G';
+      iconPal = ICON_PALETTES[_mpEditingIcon] || ICON_PALETTES.G;
+      delete S.playerPhotos[name];
+    }
     S.customPalettes[name] = iconPal;
     
     if(oldName !== name){
-      // Rename player everywhere
       S.players[_mpEditingIdx] = name;
-      // Stats
       ['mW','mL','aW','aL','sk'].forEach(k=>{ S[k][name]=S[k][oldName]||0; delete S[k][oldName]; });
       if(S.rewardCounts){ S.rewardCounts[name]=S.rewardCounts[oldName]||0; delete S.rewardCounts[oldName]; }
       if(S.logTs){ S.logTs[name]=S.logTs[oldName]||0; delete S.logTs[oldName]; }
       if(S.decks){ S.decks[name]=S.decks[oldName]||[]; delete S.decks[oldName]; }
-      if(S.playerIcons){ S.playerIcons[name]=_mpEditingIcon||S.playerIcons[oldName]||'G'; delete S.playerIcons[oldName]; }
+      if(S.playerIcons){ S.playerIcons[name]=S.playerIcons[name]; delete S.playerIcons[oldName]; }
       if(S.customPalettes){ S.customPalettes[name]=iconPal; delete S.customPalettes[oldName]; }
-      // Update log entries
+      if(S.playerPhotos){ if(_mpHasPhoto&&_mpEditingPhoto){S.playerPhotos[name]=_mpEditingPhoto;}else{delete S.playerPhotos[name];} delete S.playerPhotos[oldName]; }
       (S.log||[]).forEach(g=>{ if(g.winner===oldName)g.winner=name; if(g.losers)g.losers=g.losers.map(x=>x===oldName?name:x); });
     }
   }
@@ -4621,7 +4767,7 @@ function epSave(){
   save();
   closeEditPlayer();
   renderMPList();
-  render(); // Refresh all tabs (Log, Coin Flip, Decks, Leaderboard, Stats, etc.)
+  render();
 }
 
 function epRemoveStep1(){
@@ -4646,6 +4792,7 @@ function epRemoveFinal(){
   if(S.decks) delete S.decks[oldName];
   if(S.playerIcons) delete S.playerIcons[oldName];
   if(S.customPalettes) delete S.customPalettes[oldName];
+  if(S.playerPhotos) delete S.playerPhotos[oldName];
   save();
   closeEditPlayer();
   renderMPList();
@@ -4746,8 +4893,9 @@ function epRemoveCancel(){
       <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">Player Name</div>
       <input id="ep-name-input" style="width:100%;padding:9px 11px;border-radius:7px;border:1px solid var(--border2);background:rgba(0,0,0,.4);color:var(--tx);font-family:'Crimson Pro',serif;font-size:14px;outline:none;" placeholder="Player name…">
     </div>
+    <div id="ep-photo-section" style="margin-bottom:14px;"></div>
     <div style="margin-bottom:16px;">
-      <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Icon (Color)</div>
+      <div id="ep-icon-label" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Icon (Color)</div>
       <div id="ep-icon-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
