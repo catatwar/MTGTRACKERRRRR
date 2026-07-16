@@ -915,6 +915,11 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 </style>
 
+<script>
+/* LZString 1.5.0 - MIT License - used for compact save-code compression */
+var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();"function"==typeof define&&define.amd?define(function(){return LZString}):"undefined"!=typeof module&&null!=module?module.exports=LZString:"undefined"!=typeof angular&&null!=angular&&angular.module("LZString",[]).factory("LZString",function(){return LZString});
+</script>
+
 <link rel="stylesheet" href="chrome-extension://a5687425-ea9f-48cb-bc33-9f1260157c17/app/content-style.css"></head>
 
 <body id="artifacts-component-root-html" class="">
@@ -2957,13 +2962,13 @@ reader.readAsText(file);
 
 }
 
-function copySaveCode(){
+async function copySaveCode(){
 
 try{
 
 const payload={_schema:2,_exported:new Date().toISOString(),...S};
 
-const code=btoa(JSON.stringify(payload));
+const code=await encodeSaveCode(payload);
 
 navigator.clipboard.writeText(code).then(()=>setShareStatus('✦ Save code copied! Paste it in any version of the tracker.')).catch(()=>{
 
@@ -2979,6 +2984,85 @@ document.body.removeChild(ta);setShareStatus('✦ Save code copied to clipboard!
 
 }
 
+/* ═══ Compact save-code encoding ═══════════════════════════
+   Tiered, from tightest to loosest, all decoded automatically by prefix:
+   "Z2:" — real DEFLATE (native browser CompressionStream) + base64. Tightest.
+   "Z1:" — LZString compression + base64. Used only if CompressionStream is unavailable.
+   (no prefix) — legacy plain base64(JSON), exactly what old versions produced.
+   Decoding always checks the prefix, so save codes from every past version
+   of the tracker keep working forever — nothing is ever lost. */
+
+function _bytesToBase64(bytes){
+  let binary='';
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary+=String.fromCharCode.apply(null, bytes.subarray(i,i+chunk));
+  }
+  return btoa(binary);
+}
+function _base64ToBytes(b64){
+  const binary=atob(b64);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return bytes;
+}
+
+async function _deflateRawToBase64(bytes){
+  const cs=new CompressionStream('deflate-raw');
+  const writer=cs.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const buf=await new Response(cs.readable).arrayBuffer();
+  return _bytesToBase64(new Uint8Array(buf));
+}
+async function _inflateRawFromBase64(b64){
+  const bytes=_base64ToBytes(b64);
+  const ds=new DecompressionStream('deflate-raw');
+  const writer=ds.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const buf=await new Response(ds.readable).arrayBuffer();
+  return new Uint8Array(buf);
+}
+
+async function encodeSaveCode(payload){
+  const json=JSON.stringify(payload);
+  if(typeof CompressionStream!=='undefined'){
+    try{
+      const bytes=new TextEncoder().encode(json);
+      const b64=await _deflateRawToBase64(bytes);
+      return 'Z2:'+b64;
+    }catch(_){ /* fall through to LZString */ }
+  }
+  if(typeof LZString!=='undefined'){
+    return 'Z1:'+LZString.compressToBase64(json);
+  }
+  // Last-resort fallback — old format, still valid.
+  return btoa(unescape(encodeURIComponent(json)));
+}
+
+async function decodeSaveCode(code){
+  code=code.trim();
+  if(code.indexOf('Z2:')===0){
+    const bytes=await _inflateRawFromBase64(code.slice(3));
+    const json=new TextDecoder().decode(bytes);
+    return JSON.parse(json);
+  }
+  if(code.indexOf('Z1:')===0){
+    const packed=code.slice(3);
+    const json=LZString.decompressFromBase64(packed);
+    if(json==null) throw new Error('corrupt compact save code');
+    return JSON.parse(json);
+  }
+  // Legacy format: plain base64(JSON), no prefix. Support both old ASCII-only
+  // btoa() codes and UTF-8-safe variants for maximum backward compatibility.
+  try{
+    return JSON.parse(decodeURIComponent(escape(atob(code))));
+  }catch(_){
+    return JSON.parse(atob(code));
+  }
+}
+
 function showPasteArea(){
 
 const w=$('paste-area-wrap');
@@ -2987,7 +3071,7 @@ w.style.display=w.style.display==='none'?'block':'none';
 
 }
 
-function importFromCode(){
+async function importFromCode(){
 
 const code=$('paste-input').value.trim();
 
@@ -2995,7 +3079,7 @@ if(!code){setShareStatus('✦ Please paste a save code first.');return}
 
 try{
 
-const raw=JSON.parse(atob(code));
+const raw=await decodeSaveCode(code);
 
 delete raw._schema;delete raw._exported;
 
@@ -4349,6 +4433,7 @@ function closeStatsSnapshot(){
   let _coinWinner = null;
   let _coinHeadPlayer = null;
   let _coinTailPlayer = null;
+  let _lastOverallWinner = null; // last final flip winner — never repeats immediately
   // For the shuffle effect: track when we last swapped a face
   let _lastFaceSwapTime = 0;
 
@@ -4357,13 +4442,13 @@ function closeStatsSnapshot(){
     _coinFlipping = false;
     _coinAngle = 0;
     _coinWinner = null;
+    _lastOverallWinner = null;
     _coinSelected = S.players.slice();
     const ov = $('coin-flip-overlay');
     ov.style.display = 'flex';
     _buildPlayerBtns();
-    // Show first two selected players on faces to start
-    _coinHeadPlayer = _coinSelected[0];
-    _coinTailPlayer = _coinSelected[1] || _coinSelected[0];
+    // Randomly assign who starts on which face instead of always the same order
+    _assignRandomFaces();
     _updateCoinFaces();
     _clearResult();
     _setCoinTransform(0, false);
@@ -4385,11 +4470,13 @@ function closeStatsSnapshot(){
       const on = _coinSelected.includes(p);
       const btn = document.createElement('button');
       btn.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;`
-        + `border:1.5px solid ${on ? pl.bar+'bb' : 'rgba(255,255,255,.08)'};`
-        + `background:${on ? pl.bg+'dd' : 'rgba(0,0,0,.25)'};`
-        + `color:${on ? pl.cl : '#5a4830'};`
-        + `font-family:'Cinzel',serif;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;`
-        + `opacity:${on?'1':'.55'};`;
+        + `border:1.5px solid ${pl.bar}bb;`
+        + `background:${pl.bar}2e;`
+        + `color:${pl.cl};`
+        + `font-family:'Cinzel',serif;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em;`
+        + `transition:filter .15s,opacity .15s;`
+        + `filter:${on ? 'none' : 'brightness(.25) saturate(.7)'};`
+        + `opacity:${on ? '1' : '.85'};`;
       btn.innerHTML = `<span style="pointer-events:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;">${playerAvatar(p,14)}</span>`
         + `<span style="pointer-events:none">${ESC(p)}</span>`;
       btn.onclick = ()=>_togglePlayer(p);
@@ -4416,12 +4503,23 @@ function closeStatsSnapshot(){
       _coinSelected.push(p);
     }
     _buildPlayerBtns();
-    _coinHeadPlayer = _coinSelected[0];
-    _coinTailPlayer = _coinSelected[1] || _coinSelected[0];
+    _assignRandomFaces();
     _updateCoinFaces();
     _clearResult();
     _setCoinTransform(0, false);
     _coinAngle = 0;
+  }
+
+  // Randomly pick which two selected players show on the two faces, and
+  // randomly decide which of them starts on heads vs tails.
+  function _assignRandomFaces(){
+    if(_coinSelected.length === 0){ _coinHeadPlayer = null; _coinTailPlayer = null; return; }
+    if(_coinSelected.length === 1){ _coinHeadPlayer = _coinTailPlayer = _coinSelected[0]; return; }
+    const a = _coinSelected[Math.floor(Math.random() * _coinSelected.length)];
+    let b;
+    do { b = _coinSelected[Math.floor(Math.random() * _coinSelected.length)]; } while(b === a);
+    if(Math.random() < 0.5){ _coinHeadPlayer = a; _coinTailPlayer = b; }
+    else { _coinHeadPlayer = b; _coinTailPlayer = a; }
   }
 
   function _updateCoinFaces(){
@@ -4482,11 +4580,18 @@ function closeStatsSnapshot(){
     _lastFaceSwapTime = 0;
     _lastShufflePlayer = null;
 
-    // Pick winner now but keep it secret until the end
-    _coinWinner = _coinSelected[Math.floor(Math.random() * _coinSelected.length)];
+    // Pick winner now but keep it secret until the end.
+    // Exclude the previous flip's winner from the pool when possible: for
+    // exactly 2 players this makes it a true alternating 50/50 (never the
+    // same person twice running), and for larger pools it still guarantees
+    // no immediate repeat while remaining an even random pick among the rest.
+    let candidates = _coinSelected.filter(p => p !== _lastOverallWinner);
+    if(candidates.length === 0) candidates = _coinSelected.slice();
+    _coinWinner = candidates[Math.floor(Math.random() * candidates.length)];
+    _lastOverallWinner = _coinWinner;
 
     const duration = 1800 + Math.random() * 400; // total spin time ms
-    const fullSpins = 5 + Math.floor(Math.random() * 4);
+    const fullSpins = 10 + Math.floor(Math.random() * 6); // 10–15 full rotations
     const startAngle = _coinAngle;
     // Winner always lands on heads face (angle = multiple of 360°)
     const landingAngle = startAngle + fullSpins * 360;
