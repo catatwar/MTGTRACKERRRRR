@@ -3652,9 +3652,13 @@ return[...arr].sort((a,b)=>{
 
 const aW=S.mW[a]||0,aL=S.mL[a]||0;const bW=S.mW[b]||0,bL=S.mL[b]||0;
 
+// Most wins always ranks first — a small sample size with a flashy
+// win rate can no longer outrank someone with strictly more wins.
+if(aW!==bW) return bW-aW;
+
 const diff=wilsonLB(bW,bL)-wilsonLB(aW,aL);
 
-if(Math.abs(diff)<0.001&&aW===bW&&aL===bL){
+if(Math.abs(diff)<0.001&&aL===bL){
 
 // Tiebreak by who got that stat first (earlier log timestamp = longer holder)
 
