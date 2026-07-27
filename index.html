@@ -913,6 +913,46 @@ box-shadow:0 4px 16px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);}
 
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--tx3);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.06em}
 
+/* ---------- Portrait lock (phones only) ---------- */
+/* True orientation-locking isn't reliably available to a plain web page
+   (iOS Safari doesn't support it at all; Android only allows it in a
+   fullscreen/installed context) — so instead of fighting the browser,
+   this blocks interaction with a plain "please rotate back" overlay
+   whenever a touchscreen device is both landscape AND short enough to
+   be a phone rather than a tablet or a laptop window. */
+.portrait-lock-overlay{ display:none; }
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 500px){
+  .portrait-lock-overlay{
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: var(--deep);
+    color: var(--tx);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    font-family: 'Crimson Pro', serif;
+  }
+}
+.portrait-lock-icon{ font-size: 2.6rem; margin-bottom: 14px; }
+.portrait-lock-title{
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .04em;
+  margin-bottom: 8px;
+}
+.portrait-lock-sub{
+  font-size: 0.88rem;
+  color: var(--tx3);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
 </style>
 
 <script>
@@ -932,6 +972,14 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   }
 })();
 </script>
+
+<!-- Portrait lock: pure CSS, shows automatically via media query when a
+     phone is rotated to landscape. No JS needed. -->
+<div class="portrait-lock-overlay" id="portraitLockOverlay">
+  <div class="portrait-lock-icon">📱</div>
+  <div class="portrait-lock-title">Rotate back to portrait</div>
+  <div class="portrait-lock-sub">MTG Tracker is designed for portrait mode — turn your device back to keep going.</div>
+</div>
 
 <div id="shake-wrapper">
 <canvas id="particle-canvas" width="934" height="714" class=""></canvas>
@@ -1772,6 +1820,21 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
     <button class="secret-btn" style="width:100%;" onclick="downloadHTML()">⬇ Download HTML File</button>
   </div>
 
+  <!-- ── DECK CODEX SYNC ── -->
+  <div class="settings-section">
+    <div class="settings-section-title">🔗 Deck Codex Sync</div>
+    <p style="font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Sign in with your Deck Codex account to see shared decks here and keep win/loss records in sync between both apps. This is entirely optional — everything else keeps working exactly the same without it.</p>
+    <div id="codex-sync-status" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx3);margin-bottom:8px;letter-spacing:.03em;">Not connected</div>
+    <div id="codex-sync-form">
+      <input type="email" id="codex-sync-email" class="deck-input" placeholder="Deck Codex email" style="width:100%;margin-bottom:6px;" autocomplete="username">
+      <input type="password" id="codex-sync-password" class="deck-input" placeholder="Password" style="width:100%;margin-bottom:8px;" autocomplete="current-password">
+      <button class="secret-btn" style="width:100%;" onclick="codexSyncSignIn()">Connect</button>
+    </div>
+    <button class="secret-btn" id="codex-sync-signout-btn" style="width:100%;display:none;" onclick="codexSyncSignOut()">Disconnect</button>
+    <div class="share-status" id="codex-sync-error" style="margin-top:6px;"></div>
+    <div id="codex-sync-write-status" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);margin-top:6px;letter-spacing:.02em;line-height:1.5;"></div>
+  </div>
+
   <!-- ── SAVE & TRANSFER ── -->
   <div class="settings-section">
     <div class="settings-section-title">💾 Save &amp; Transfer Data</div>
@@ -2369,24 +2432,44 @@ function renderDecksPanel(){
   }
 
   const decks=(S.decks[_deckSelPlayer])||[];
+  const syncedDecks=codexSyncedDecksFor(_deckSelPlayer);
   addWrap.style.display='block';
 
-  if(decks.length===0){
+  if(decks.length===0&&syncedDecks.length===0){
     listWrap.innerHTML='<div class="deck-list"><div class="deck-empty">No decks added yet.</div></div>';
   } else {
-    listWrap.innerHTML=`<div class="deck-list">${decks.map((d,i)=>{
-      const nm=deckName(d);const col=deckColor(d);
-      const pl=pal(_deckSelPlayer);
-      const pips=col&&col.length?[...col].map(id=>{const c=DECK_COLORS.find(x=>x.id===id);return c?`<span style="display:inline-flex;flex-shrink:0;">${c.render(20)}</span>`:''}).join(''):`<span style="font-size:16px">🃏</span>`;
-      const rmStep=_deckRemoveStep[i]||0;
-      const rmBtns=rmStep===0
-        ? `<button class="deck-remove-btn" onclick="removeDeck(${i})" title="Remove deck">−</button>`
-        : rmStep===1
-          ? `<span style="font-family:'Cinzel',serif;font-size:9px;color:#e06060;letter-spacing:.02em;">Remove?</span><button onclick="removeDeck(${i})" style="padding:3px 7px;border-radius:5px;border:1px solid rgba(200,60,60,.5);background:rgba(200,60,60,.1);color:#ff6060;font-family:'Cinzel',serif;font-size:9px;font-weight:700;cursor:pointer;">Yes</button><button onclick="cancelRemoveDeck()" style="padding:3px 7px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--tx3);font-family:'Cinzel',serif;font-size:9px;cursor:pointer;">No</button>`
-          : `<span style="font-family:'Cinzel',serif;font-size:9px;color:#ff4040;font-weight:700;letter-spacing:.02em;">Sure?</span><button onclick="removeDeck(${i})" style="padding:3px 7px;border-radius:5px;border:1px solid rgba(200,30,30,.7);background:rgba(200,30,30,.2);color:#ff3030;font-family:'Cinzel',serif;font-size:9px;font-weight:700;cursor:pointer;">Delete</button><button onclick="cancelRemoveDeck()" style="padding:3px 7px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--tx3);font-family:'Cinzel',serif;font-size:9px;cursor:pointer;">Cancel</button>`;
-      const editBtn=`<button onclick="openEditDeck(${i})" title="Edit deck" style="width:30px;height:30px;border-radius:50%;border:2px solid rgba(212,168,67,.35);background:rgba(212,168,67,.08);color:var(--gold);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;line-height:1;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent;">✎</button>`;
-      return`<div class="deck-entry" style="flex-wrap:${rmStep>0?'wrap':'nowrap'};gap:${rmStep>0?'6px':'0'}"><button class="deck-view-btn" onclick="openDeckInfo('${ESC(_deckSelPlayer)}',${i})" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(nm)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div><div style="display:flex;gap:5px;align-items:center;flex-shrink:0">${editBtn}${rmBtns}</div></div>`;
-    }).join('')}</div>`;
+    // One combined list: locally-added decks and Deck Codex-synced decks
+    // sit together, with synced entries marked by a small 🔗 badge instead
+    // of living in a separate section. Deck management (add/edit/delete)
+    // happens in Deck Codex now — this view is read-only, so there's no
+    // edit/remove control on either kind of row.
+    // Defensive de-dupe: a local deck sharing a name (case-insensitive)
+    // with an already-synced deck is skipped here too, in case it hasn't
+    // been cleaned out of local storage yet by reconcileLocalDecksWithCodex.
+    const syncedNameSet=new Set(syncedDecks.map(d=>(d.name||'').trim().toLowerCase()));
+    const localRows=decks
+      .map((d,i)=>({d,i}))
+      .filter(({d})=>{
+        const nm=deckName(d);
+        return !(nm && syncedNameSet.has(nm.trim().toLowerCase()));
+      })
+      .map(({d,i})=>{
+        const nm=deckName(d);const col=deckColor(d);
+        const pips=col&&col.length?[...col].map(id=>{const c=DECK_COLORS.find(x=>x.id===id);return c?`<span style="display:inline-flex;flex-shrink:0;">${c.render(20)}</span>`:''}).join(''):`<span style="font-size:16px">🃏</span>`;
+        return`<div class="deck-entry"><button class="deck-view-btn" onclick="openDeckInfo('${ESC(_deckSelPlayer)}',${i})" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(nm)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div></div>`;
+      }).join('');
+    const syncedRows=syncedDecks.map(d=>{
+      const pips=d.colors&&d.colors.length?d.colors.map(id=>{const c=DECK_COLORS.find(x=>x.id===id);return c?`<span style="display:inline-flex;flex-shrink:0;">${c.render(20)}</span>`:''}).join(''):`<span style="font-size:16px">🃏</span>`;
+      let wins=0,games=0;
+      (S.log||[]).forEach(g=>{
+        const usedDeck=deckUsedInGame(g,_deckSelPlayer);
+        if(usedDeck===d.name){ games++; if(g.winner===_deckSelPlayer) wins++; }
+      });
+      const wr=games>0?Math.round(wins/games*100):0;
+      const recordText=games>0?`${wins} – ${games-wins} (${wr}%)`:'No games yet';
+      return`<div class="deck-entry"><button class="deck-view-btn" onclick="openSyncedDeckInfo('${ESC(_deckSelPlayer)}','${ESC(d.id)}')" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span title="Synced from Deck Codex" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;flex-shrink:0;background:rgba(100,160,255,.15);border:1px solid rgba(100,160,255,.35);font-size:9px;">🔗</span><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(d.name)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div><span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;">${recordText}</span></div>`;
+    }).join('');
+    listWrap.innerHTML=`<div class="deck-list">${localRows}${syncedRows}</div>`;
   }
 
   // Render color row
@@ -2515,6 +2598,7 @@ function confirmAddDeck(){
   const confirmBtn=document.getElementById('deck-confirm-btn');
   if(confirmBtn) confirmBtn.textContent='Add Deck';
   renderDecksPanel();
+  if(typeof reconcileLocalDecksWithCodex === 'function') reconcileLocalDecksWithCodex();
 }
 
 let _deckEditIdx=-1; // -1 = not editing, else index of deck being edited
@@ -2530,20 +2614,181 @@ function removeDeck(idx){
 }
 function cancelRemoveDeck(){_deckRemoveStep={};renderDecksPanel();}
 
+/* ═══ DECK CODEX SYNC (optional) ══════════════════════════
+   Synced decks are held entirely in window.CodexSync.decksByOwner —
+   never written into S.decks or localStorage — on purpose. That means
+   Save Code export/import (and everything else in this file) can't
+   touch them even by accident; they're always freshly read from
+   Firestore. Codex owns name/description/colors/type for these decks;
+   this tracker only ever writes their wins/losses. */
+
+function codexSyncedDecksFor(playerName){
+  if(!window.CodexSync) return [];
+  return window.CodexSync.decksForPlayer(playerName);
+}
+
+function refreshCodexSyncSettingsUI(){
+  const statusEl=document.getElementById('codex-sync-status');
+  const formEl=document.getElementById('codex-sync-form');
+  const signoutBtn=document.getElementById('codex-sync-signout-btn');
+  const errorEl=document.getElementById('codex-sync-error');
+  const writeStatusEl=document.getElementById('codex-sync-write-status');
+  if(!statusEl||!formEl||!signoutBtn) return;
+  const cs=window.CodexSync;
+  if(cs&&cs.connectedEmail){
+    statusEl.textContent=`✓ Connected as ${cs.connectedEmail}`;
+    formEl.style.display='none';
+    signoutBtn.style.display='block';
+  }else{
+    statusEl.textContent=cs?'Not connected':'Loading…';
+    formEl.style.display='block';
+    signoutBtn.style.display='none';
+  }
+  if(errorEl) errorEl.textContent=(cs&&cs.lastError)||'';
+  if(writeStatusEl){
+    if(cs&&cs.lastStatsError){
+      writeStatusEl.style.color='#e06060';
+      writeStatusEl.textContent=`⚠ Last win/loss sync failed: ${cs.lastStatsError}`;
+    }else if(cs&&cs.lastStatsSyncAt){
+      writeStatusEl.style.color='';
+      writeStatusEl.textContent=`✓ Win/loss last synced to Deck Codex at ${new Date(cs.lastStatsSyncAt).toLocaleTimeString()}`;
+    }else{
+      writeStatusEl.textContent='';
+    }
+  }
+}
+
+async function codexSyncSignIn(){
+  const emailInp=document.getElementById('codex-sync-email');
+  const pwInp=document.getElementById('codex-sync-password');
+  const errorEl=document.getElementById('codex-sync-error');
+  if(!window.CodexSync){ if(errorEl) errorEl.textContent='Still loading — try again in a moment.'; return; }
+  const email=(emailInp.value||'').trim();
+  const password=pwInp.value||'';
+  if(!email||!password){ if(errorEl) errorEl.textContent='Enter both an email and a password.'; return; }
+  try{
+    await window.CodexSync.signIn(email, password);
+    pwInp.value='';
+  }catch(e){
+    refreshCodexSyncSettingsUI();
+  }
+}
+
+async function codexSyncSignOut(){
+  if(!window.CodexSync) return;
+  await window.CodexSync.signOutNow();
+}
+
+// Called by the Firebase module whenever auth state or synced deck data
+// changes — keeps the Settings status line and the Deck Manager panel
+// (if it's the currently visible tab) live without a page reload.
+function onCodexSyncChange(){
+  refreshCodexSyncSettingsUI();
+  reconcileLocalDecksWithCodex();
+  // Recompute every player's synced-deck stats here too, not just after a
+  // new game — otherwise a deck's *past* history never reaches Codex until
+  // another game happens to get logged with it. This runs whenever sync
+  // data changes (connecting, a deck just getting pushed/linked, etc.), so
+  // existing history gets backfilled as soon as a deck becomes linked.
+  syncDeckStatsToFirestore(S.players);
+  const decksPanel=document.getElementById('panel-decks');
+  if(decksPanel&&decksPanel.classList.contains('active')) renderDecksPanel();
+}
+
+// The Codex-decks-show-up-here direction is automatic (codexSyncedDecksFor).
+// This is the other direction: any deck that only exists in this Tracker's
+// local storage (typed in directly, or restored from a Save Code) but has
+// no match on Deck Codex yet gets created there. Matched per-player by deck
+// name (case-insensitive). Once a local deck is confirmed to exist on Codex
+// — either just pushed here, or it already existed there — the local copy
+// is dropped, since keeping both around is what caused two entries for the
+// same deck to show up. Silently skips (leaves local, doesn't nag) any deck
+// it doesn't have permission to push, e.g. someone else's locally-added
+// deck when this signed-in account isn't the leader.
+let _reconcilingCodexDecks=false;
+async function reconcileLocalDecksWithCodex(){
+  if(_reconcilingCodexDecks) return;
+  if(!window.CodexSync||!window.CodexSync.ready) return;
+  _reconcilingCodexDecks=true;
+  let changed=false;
+  try{
+    for(const playerName of Object.keys(S.decks||{})){
+      const localList=S.decks[playerName]||[];
+      if(!localList.length) continue;
+      if(!window.CodexSync.canPushFor(playerName)){
+        continue; // can't push, and can't confirm Codex state either — leave local as-is
+      }
+      const syncedNames=new Set(codexSyncedDecksFor(playerName).map(d=>(d.name||'').trim().toLowerCase()));
+      const kept=[];
+      for(const d of localList){
+        const nm=deckName(d);
+        const key=(nm||'').trim().toLowerCase();
+        if(nm && syncedNames.has(key)){
+          // Already on Codex (from an earlier push, or added there
+          // directly) — the local copy is now a redundant duplicate.
+          changed=true;
+          continue;
+        }
+        if(!nm){ kept.push(d); continue; }
+        try{
+          await window.CodexSync.pushNewDeck(playerName, d);
+          changed=true; // now lives on Codex — drop the local copy below
+        }catch(e){
+          console.error('Could not push local deck to Deck Codex', e);
+          kept.push(d); // push failed, so keep the only copy that exists
+        }
+      }
+      if(kept.length !== localList.length) S.decks[playerName]=kept;
+    }
+    if(changed){ save(); renderDecksPanel(); }
+  } finally {
+    _reconcilingCodexDecks=false;
+  }
+}
+
+// Recomputes wins/losses for this player's synced decks from the full
+// match log (same logic as the deck-info popup) and pushes the result to
+// Firestore. Called after logging or undoing a game — never touches
+// anything if nobody's connected.
+function syncDeckStatsToFirestore(playerNames){
+  if(!window.CodexSync||!window.CodexSync.ready) return;
+  const seen=new Set();
+  (playerNames||[]).forEach(playerName=>{
+    if(!playerName||seen.has(playerName)) return;
+    seen.add(playerName);
+    const synced=codexSyncedDecksFor(playerName);
+    synced.forEach(sd=>{
+      let wins=0,games=0,lastPlayedAt=null;
+      (S.log||[]).forEach(g=>{
+        const usedDeck=deckUsedInGame(g,playerName);
+        if(usedDeck===sd.name){
+          games++;
+          if(g.winner===playerName) wins++;
+          if(g.ts && (!lastPlayedAt || g.ts>lastPlayedAt)) lastPlayedAt=g.ts;
+        }
+      });
+      const losses=games-wins;
+      // no change, skip the write (lastPlayedAt only ever moves forward, so
+      // comparing it here too catches a re-log of an older/undone game).
+      if(sd.wins===wins&&sd.losses===losses&&(sd.lastPlayedAt||null)===(lastPlayedAt||null)) return;
+      window.CodexSync.pushDeckStats(sd.id, wins, losses, lastPlayedAt);
+    });
+  });
+}
+
 /* ═══ DECK INFO POPUP ══════════════════════════════════ */
 
-function openDeckInfo(playerName, deckIdx){
-  const decks=S.decks&&S.decks[playerName];
-  if(!decks||!decks[deckIdx])return;
-  const d=decks[deckIdx];
-  const nm=deckName(d);const desc=deckDesc(d);const col=deckColor(d);
+// Shared by both local decks and Codex-synced decks so synced decks get the
+// exact same info popup (including description) instead of a stripped-down
+// view. matchName is whatever deckUsedInGame() would have recorded for this
+// deck (its name), used to tally this player's actual games/wins with it.
+function showDeckInfoModal(playerName, nm, desc, col, dt, matchName){
   const pl=pal(playerName);
 
   // Color icon
   const colorEl=document.getElementById('di-color');
   if(colorEl){colorEl.innerHTML=deckColorIcon(col,34);colorEl.style.background=pl.bg;colorEl.style.borderColor=pl.bar+'55';}
 
-  const dt=deckType(d);
   document.getElementById('di-name').textContent=nm;
   document.getElementById('di-owner').textContent=`${playerName}'s Deck${dt?' · '+dt:''}`;
 
@@ -2554,7 +2799,7 @@ function openDeckInfo(playerName, deckIdx){
   let wins=0,games=0;
   (S.log||[]).forEach(g=>{
     const usedDeck=deckUsedInGame(g,playerName);
-    if(usedDeck===nm){
+    if(usedDeck===matchName){
       games++;
       if(g.winner===playerName)wins++;
     }
@@ -2570,6 +2815,23 @@ function openDeckInfo(playerName, deckIdx){
   }
 
   document.getElementById('deck-info-overlay').classList.add('open');
+}
+
+function openDeckInfo(playerName, deckIdx){
+  const decks=S.decks&&S.decks[playerName];
+  if(!decks||!decks[deckIdx])return;
+  const d=decks[deckIdx];
+  showDeckInfoModal(playerName, deckName(d), deckDesc(d), deckColor(d), deckType(d), deckName(d));
+}
+
+// Codex-synced decks aren't in S.decks (see note above codexSyncedDecksFor),
+// so they're looked up by id from CodexSync instead of by array index.
+function openSyncedDeckInfo(playerName, deckId){
+  const synced=codexSyncedDecksFor(playerName);
+  const d=synced.find(x=>x.id===deckId);
+  if(!d) return;
+  const col=(d.colors&&d.colors.length)?d.colors.join(''):(d.colorless?'C':'');
+  showDeckInfoModal(playerName, d.name, d.description||'', col, d.buildType||'', d.name);
 }
 
 function closeDeckInfo(e){
@@ -2900,6 +3162,7 @@ function doUndo(){
   S.log.splice(idx, 1);
   _pushUndo(`game undo: ${winner} win`, before);
   save(); render();
+  syncDeckStatsToFirestore([winner, ...losers]);
 }
 
 function redoGame(){ /* kept for backward compat — no-op now */ }
@@ -3090,6 +3353,8 @@ const merged={...fresh};
 Object.keys(raw).forEach(k=>{if(k in fresh||typeof raw[k]==='object')merged[k]=raw[k]});
 
 S=migrateState(merged);save();render();
+
+if(typeof reconcileLocalDecksWithCodex === 'function') reconcileLocalDecksWithCodex();
 
 $('paste-area-wrap').style.display='none';
 
@@ -3527,9 +3792,25 @@ return`<button class="pbtn${isSel?' sl':''}" onclick="pickL('${ESC(p)}')" style=
 
 // Deck selection (only shown after winner is picked)
 function _deckSelBtns(playerName,activeName,onclickFn){
-  const playerDecks=(S.decks&&S.decks[playerName])||[];
-  if(playerDecks.length===0)return null;
-  const btns=playerDecks.map(d=>{
+  const localDecks=(S.decks&&S.decks[playerName])||[];
+  const synced=codexSyncedDecksFor(playerName);
+  // Combine both sources, de-duped by name (case-insensitive) so a deck
+  // that somehow exists in both places doesn't show up twice.
+  const seenNames=new Set();
+  const allDecks=[];
+  localDecks.forEach(d=>{
+    const nm=deckName(d);
+    if(seenNames.has(nm.toLowerCase()))return;
+    seenNames.add(nm.toLowerCase());
+    allDecks.push(d);
+  });
+  synced.forEach(d=>{
+    if(seenNames.has(d.name.toLowerCase()))return;
+    seenNames.add(d.name.toLowerCase());
+    allDecks.push(d);
+  });
+  if(allDecks.length===0)return null;
+  const btns=allDecks.map(d=>{
     const nm=deckName(d);
     const isActive=activeName===nm;
     const initials=nm.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
@@ -3555,10 +3836,11 @@ const deckWrap=document.getElementById('log-deck-sel-wrap');
 if(deckWrap)deckWrap.innerHTML=deckHtml;
 
 const _winnerDecks=_selW?(S.decks&&S.decks[_selW]||[]):[];
-const _needsWinnerDeck=_winnerDecks.length>0;
+const _needsWinnerDeck=_winnerDecks.length>0||codexSyncedDecksFor(_selW).length>0;
 const _needsLoserDeck=[..._selL].some(loserName=>{
   const ld=(S.decks&&S.decks[loserName])||[];
-  return ld.length>0&&!_selLoserDecks[loserName];
+  const hasAnyDeck=ld.length>0||codexSyncedDecksFor(loserName).length>0;
+  return hasAnyDeck&&!_selLoserDecks[loserName];
 });
 DOM.logBtn.disabled=!_selW||(_needsWinnerDeck&&!_selDeck)||_needsLoserDeck;
 
@@ -3612,6 +3894,7 @@ const brokenPlayers=losers.filter(x=>oldLStreaks[x]>=2);
 _selW=null;_selL.clear();_selDeck=null;_selLoserDecks={};
 
 save();render();
+syncDeckStatsToFirestore([w, ...losers]);
 
 // Switch to home tab via drawer system (handles panel switch + drawer close + active state)
 const monthDrawerBtn=document.querySelector('.drawer-tab[data-tab="monthly"]');
@@ -5255,4 +5538,232 @@ function epRemoveCancel(){
     </div>
   </div>
 </div>
+
+<!-- ---------- Deck Codex sync (optional) ---------- -->
+<!-- Firebase must run as an ES module; everything below bridges it to the
+     rest of this file (which is plain, non-module script) via window.CodexSync.
+     Entirely opt-in: nothing here runs unless someone signs in from Settings,
+     and the rest of the tracker behaves exactly as before if they don't. -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import {
+    getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged,
+    signInWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import {
+    getFirestore, collection, collectionGroup, doc, query, where, getDocs, getDoc, setDoc, onSnapshot, updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  // Same Firebase project Deck Codex uses — this is what makes the two
+  // apps see the same data. The API key here is a public client identifier
+  // (not a secret); access is governed by Firestore's own security rules,
+  // same as it is in Deck Codex.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDb3arF_8bSV3Ga83Zx-m7KuP0P9tN26xc",
+    authDomain: "deck-codex.firebaseapp.com",
+    projectId: "deck-codex",
+    storageBucket: "deck-codex.firebasestorage.app",
+    messagingSenderId: "1086947063600",
+    appId: "1:1086947063600:web:8a940708cacee4fbaabaf5",
+    measurementId: "G-8370EN67DG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  setPersistence(auth, browserLocalPersistence).catch(()=>{ /* non-fatal */ });
+
+  let groupDecksCol = null;
+  let unsubscribeDecks = null;
+  let currentGroupId = null;
+  let myUid = null;
+  let isLeaderFlag = false;
+  // Lowercased Deck Codex display name -> { uid, displayName }. Lets a
+  // locally-added Tracker deck (keyed only by player name, a plain string)
+  // be matched to the actual Codex member it belongs to when pushing it up.
+  let membersByLowerName = {};
+
+  // Tracker's local deck-type options don't share Codex's vocabulary
+  // 1:1 — closest equivalents are mapped here; anything else maps to null
+  // (Codex allows an unset buildType).
+  const TRACKER_TO_CODEX_BUILDTYPE = { Precon: 'precon', Edited: 'edited', Custom: 'homemade' };
+
+  function notify(){
+    // Defined on the plain-script side, once page scripts have run. Guarded
+    // since this module can resolve auth state before that script has had
+    // a chance to define it on a very first cold load.
+    if(typeof window.onCodexSyncChange === 'function') window.onCodexSyncChange();
+  }
+
+  function stopSyncing(){
+    if(unsubscribeDecks){ unsubscribeDecks(); unsubscribeDecks = null; }
+    groupDecksCol = null;
+    currentGroupId = null;
+    myUid = null;
+    isLeaderFlag = false;
+    membersByLowerName = {};
+    window.CodexSync.ready = false;
+    window.CodexSync.decksByOwner = {};
+    window.CodexSync.lastStatsError = null;
+    window.CodexSync.lastStatsSyncAt = null;
+    notify();
+  }
+
+  async function startSyncing(uid){
+    try{
+      myUid = uid;
+      // Same "which group is this user in" lookup Deck Codex itself uses —
+      // finds their membership record without needing a separate index
+      // that could drift out of sync.
+      const q = query(collectionGroup(db, 'members'), where('uid', '==', uid));
+      const snap = await getDocs(q);
+      if(snap.empty){ stopSyncing(); return; }
+      const groupId = snap.docs[0].ref.parent.parent.id;
+      currentGroupId = groupId;
+      groupDecksCol = collection(db, 'groups', groupId, 'decks');
+
+      // Needed so a locally-added deck can be attributed to the right
+      // member (and so we know whether this signed-in account is even
+      // allowed to push a deck on someone else's behalf — only the leader
+      // can, same rule Deck Codex itself enforces server-side).
+      try{
+        const groupSnap = await getDoc(doc(db, 'groups', groupId));
+        isLeaderFlag = !!(groupSnap.exists() && groupSnap.data().leaderUid === uid);
+      }catch(e){ isLeaderFlag = false; }
+      try{
+        const membersSnap = await getDocs(collection(db, 'groups', groupId, 'members'));
+        const map = {};
+        membersSnap.forEach(m=>{
+          const data = m.data();
+          const key = (data.displayName || '').trim().toLowerCase();
+          if(key) map[key] = { uid: data.uid, displayName: data.displayName };
+        });
+        membersByLowerName = map;
+      }catch(e){ membersByLowerName = {}; }
+
+      unsubscribeDecks = onSnapshot(groupDecksCol, (decksSnap)=>{
+        const byOwner = {};
+        decksSnap.forEach(d=>{
+          const deck = { id: d.id, ...d.data() };
+          const owner = (deck.ownerName || '').trim().toLowerCase();
+          if(!owner) return;
+          if(!byOwner[owner]) byOwner[owner] = [];
+          byOwner[owner].push(deck);
+        });
+        window.CodexSync.decksByOwner = byOwner;
+        window.CodexSync.ready = true;
+        notify();
+      }, (err)=>{
+        console.error('Deck Codex sync error', err);
+      });
+    }catch(e){
+      console.error('Could not resolve Deck Codex group', e);
+    }
+  }
+
+  window.CodexSync = {
+    ready: false,
+    connecting: false,
+    connectedEmail: null,
+    lastError: null,
+    lastStatsError: null,
+    lastStatsSyncAt: null,
+    decksByOwner: {},
+    decksForPlayer(name){
+      return this.decksByOwner[(name || '').trim().toLowerCase()] || [];
+    },
+    async signIn(email, password){
+      this.connecting = true;
+      this.lastError = null;
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+      }catch(e){
+        this.lastError = e && e.code === 'auth/invalid-credential'
+          ? 'Incorrect email or password.'
+          : "Couldn't connect — check your connection and try again.";
+        throw e;
+      }finally{
+        this.connecting = false;
+      }
+    },
+    async signOutNow(){
+      await signOut(auth);
+    },
+    async pushDeckStats(deckId, wins, losses, lastPlayedAt){
+      if(!groupDecksCol){
+        this.lastStatsError = 'Not connected to a Deck Codex group.';
+        notify();
+        return;
+      }
+      try{
+        const fields = { wins, losses };
+        // Only ever included when the caller actually has a value to send —
+        // keeps this call backward-compatible with any other call site that
+        // still calls pushDeckStats with just (deckId, wins, losses).
+        if(lastPlayedAt !== undefined) fields.lastPlayedAt = lastPlayedAt;
+        await updateDoc(doc(groupDecksCol, deckId), fields);
+        this.lastStatsError = null;
+        this.lastStatsSyncAt = Date.now();
+      }catch(e){
+        // e.code is Firestore's own error code (e.g. 'permission-denied') —
+        // surfaced in Settings so a failed push is visible without opening
+        // devtools, instead of only ever reaching the console.
+        this.lastStatsError = (e && (e.code || e.message)) || String(e);
+        console.error('Could not push deck stats to Deck Codex', e);
+      }
+      notify();
+    },
+    // Whether this signed-in account is allowed to push a new deck
+    // attributed to playerName — true for the leader (any real member),
+    // true for a regular member pushing their own name, false otherwise.
+    // Mirrors the create rule Deck Codex's own Firestore rules enforce, so
+    // this never attempts a write that would just be denied anyway.
+    canPushFor(playerName){
+      const entry = membersByLowerName[(playerName || '').trim().toLowerCase()];
+      if(!entry) return false;
+      return isLeaderFlag || entry.uid === myUid;
+    },
+    // Creates a brand-new deck doc in Deck Codex for a deck that currently
+    // only exists in this Tracker's local storage, attributed to whichever
+    // group member playerName matches. Filed into that member's personal
+    // collection, same as adding it directly in Deck Codex would do.
+    async pushNewDeck(playerName, localDeck){
+      if(!groupDecksCol || !currentGroupId) throw new Error('Not connected to a Deck Codex group.');
+      const entry = membersByLowerName[(playerName || '').trim().toLowerCase()];
+      if(!entry) throw new Error(`${playerName} isn't a Deck Codex member of this group yet.`);
+      if(!isLeaderFlag && entry.uid !== myUid) throw new Error("Only the group leader can push another player's deck.");
+
+      const isObj = typeof localDeck === 'object' && localDeck !== null;
+      const colorStr = isObj ? (localDeck.color || '') : '';
+      const colors = [...colorStr].filter(c => 'WUBRG'.includes(c));
+      const rawType = isObj ? (localDeck.deckType || '') : '';
+      const id = 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      const deckDoc = {
+        id,
+        name: (isObj ? localDeck.name : localDeck) || 'Untitled Deck',
+        description: isObj ? (localDeck.description || '') : '',
+        colors,
+        colorless: colors.length === 0,
+        collectionId: 'personal_' + entry.uid,
+        seriesId: null,
+        buildType: TRACKER_TO_CODEX_BUILDTYPE[rawType] || null,
+        ownerUid: entry.uid,
+        ownerName: entry.displayName,
+        wins: 0,
+        losses: 0,
+        createdAt: Date.now()
+      };
+      await setDoc(doc(groupDecksCol, id), deckDoc);
+      return deckDoc;
+    }
+  };
+
+  onAuthStateChanged(auth, (user)=>{
+    window.CodexSync.connectedEmail = user ? user.email : null;
+    notify();
+    if(user) startSyncing(user.uid);
+    else stopSyncing();
+  });
+</script>
+
 </body></html>
