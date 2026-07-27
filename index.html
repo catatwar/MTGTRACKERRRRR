@@ -5697,6 +5697,10 @@ function epRemoveCancel(){
   // locally-added Tracker deck (keyed only by player name, a plain string)
   // be matched to the actual Codex member it belongs to when pushing it up.
   let membersByLowerName = {};
+  // Deck id -> deck data, kept alongside decksByOwner. Lets an edit compute
+  // "what did this deck look like right before this change" locally,
+  // without an extra round-trip read, when building a history entry.
+  let decksById = {};
 
   // Tracker's local deck-type options don't share Codex's vocabulary
   // 1:1 — closest equivalents are mapped here; anything else maps to null
@@ -5719,6 +5723,7 @@ function epRemoveCancel(){
     myUid = null;
     isLeaderFlag = false;
     membersByLowerName = {};
+    decksById = {};
     window.CodexSync.ready = false;
     window.CodexSync.decksByOwner = {};
     window.CodexSync.lastStatsError = null;
@@ -5786,14 +5791,17 @@ function epRemoveCancel(){
 
       unsubscribeDecks = onSnapshot(groupDecksCol, (decksSnap)=>{
         const byOwner = {};
+        const byId = {};
         decksSnap.forEach(d=>{
           const deck = { id: d.id, ...d.data() };
+          byId[d.id] = deck;
           const owner = (deck.ownerName || '').trim().toLowerCase();
           if(!owner) return;
           if(!byOwner[owner]) byOwner[owner] = [];
           byOwner[owner].push(deck);
         });
         window.CodexSync.decksByOwner = byOwner;
+        decksById = byId;
         window.CodexSync.ready = true;
         notify();
       }, (err)=>{
@@ -5879,9 +5887,49 @@ function epRemoveCancel(){
     // Writes straight to the same deck doc Deck Codex itself reads/writes —
     // there's no separate Tracker-side copy of a synced deck to keep in
     // sync; editing IS the Firestore write, live in both apps immediately.
+    // Also records a `history` entry — the deck's state right before THIS
+    // edit — in the exact same shape Deck Codex itself writes, capped to
+    // just that one most-recent previous version (not a growing log), so
+    // either app editing a deck produces the same single "what it was
+    // right before this" entry, visible identically to every account in
+    // the group since it lives on the shared deck doc.
     async updateDeckFields(deckId, fields){
       if(!groupDecksCol) throw new Error('Not connected to a Deck Codex group.');
-      await updateDoc(doc(groupDecksCol, deckId), fields);
+      const before = decksById[deckId];
+      let payload = fields;
+      if(before){
+        const parts=[];
+        if((fields.name||'') !== (before.name||'')) parts.push(`renamed to "${fields.name}"`);
+        if((fields.description||'') !== (before.description||'')) parts.push('description updated');
+        const beforeColors=[...(before.colors||[])].sort().join(',');
+        const afterColors=[...(fields.colors||[])].sort().join(',');
+        const beforeColorless=!!before.colorless || !(before.colors&&before.colors.length);
+        const afterColorless=!!fields.colorless;
+        if(beforeColors!==afterColors || beforeColorless!==afterColorless) parts.push('color identity changed');
+        if((fields.buildType||null) !== (before.buildType||null)){
+          const label=fields.buildType ? (CODEX_TO_TRACKER_BUILDTYPE[fields.buildType]||fields.buildType) : 'none';
+          parts.push(`build set to ${label}`);
+        }
+        if(parts.length){
+          const snapshot={
+            name: before.name||'',
+            description: before.description||'',
+            colors: before.colors?before.colors.slice():[],
+            colorless: !!before.colorless || !(before.colors&&before.colors.length),
+            buildType: before.buildType||null,
+            // Tracker's edit form never touches collection/series, so these
+            // just carry over unchanged rather than being resolved to names
+            // here (Deck Codex's own edit path already does that when IT
+            // makes the edit).
+            collectionName: before.collectionName||null,
+            seriesName: before.seriesName||null
+          };
+          payload = {...fields, history:[{ts:Date.now(), text:parts.join('; '), snapshot}].concat(
+            Array.isArray(before.history)?before.history:[]
+          ).slice(0,1)};
+        }
+      }
+      await updateDoc(doc(groupDecksCol, deckId), payload);
     },
     async deleteDeck(deckId){
       if(!groupDecksCol) throw new Error('Not connected to a Deck Codex group.');
