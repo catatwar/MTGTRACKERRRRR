@@ -1,7 +1,7 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <meta name="theme-color" content="#0e0c0a">
 
@@ -29,7 +29,7 @@
 
 }
 
-html{background:var(--deep);min-height:100%;overflow-x:hidden;}
+html{background:var(--deep);min-height:100%;overflow-x:hidden;touch-action:pan-x pan-y;}
 
 html::before{content:'';position:fixed;inset:0;z-index:-2;
 
@@ -49,7 +49,7 @@ pointer-events:none;}
 
 body{font-family:'Crimson Pro',serif;color:var(--tx);background:transparent;
 
-max-width:480px;margin:0 auto;padding:16px 14px 96px;min-height:100dvh;-webkit-font-smoothing:antialiased;}
+max-width:480px;margin:0 auto;padding:16px 14px 96px;min-height:100dvh;-webkit-font-smoothing:antialiased;touch-action:pan-x pan-y;}
 
  
 
@@ -5613,12 +5613,30 @@ function epRemoveCancel(){
     try{
       myUid = uid;
       // Same "which group is this user in" lookup Deck Codex itself uses —
-      // finds their membership record without needing a separate index
-      // that could drift out of sync.
+      // finds their membership record(s) without needing a separate index
+      // that could drift out of sync. A person can belong to more than one
+      // Deck Codex group (family group, plus any others they've joined or
+      // made), and this Tracker should only ever sync against ONE of
+      // them — the original/main one — never touching any other group's
+      // decks or member list. "Original" is resolved deterministically as
+      // whichever matching group has the oldest createdAt, rather than
+      // just taking whatever Firestore happened to return first, which
+      // could silently land on the wrong group once there's more than one.
       const q = query(collectionGroup(db, 'members'), where('uid', '==', uid));
       const snap = await getDocs(q);
       if(snap.empty){ stopSyncing(); return; }
-      const groupId = snap.docs[0].ref.parent.parent.id;
+      const candidateGroupIds = [...new Set(snap.docs.map(d => d.ref.parent.parent.id))];
+      let groupId = candidateGroupIds[0];
+      if(candidateGroupIds.length > 1){
+        const groupDocs = await Promise.all(candidateGroupIds.map(async id=>{
+          try{
+            const gSnap = await getDoc(doc(db, 'groups', id));
+            return { id, createdAt: gSnap.exists() ? (gSnap.data().createdAt || Infinity) : Infinity };
+          }catch(e){ return { id, createdAt: Infinity }; }
+        }));
+        groupDocs.sort((a, b) => a.createdAt - b.createdAt);
+        groupId = groupDocs[0].id;
+      }
       currentGroupId = groupId;
       groupDecksCol = collection(db, 'groups', groupId, 'decks');
 
