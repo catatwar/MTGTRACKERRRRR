@@ -1823,7 +1823,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   <!-- ── DECK CODEX SYNC ── -->
   <div class="settings-section">
     <div class="settings-section-title">🔗 Deck Codex Sync</div>
-    <p style="font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Sign in with your Deck Codex account to see shared decks here and keep win/loss records in sync between both apps. This is entirely optional — everything else keeps working exactly the same without it.</p>
+    <p style="font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Sign in with your Deck Codex account to see shared decks here, keep win/loss records in sync between both apps, and keep your whole Tracker (players, games, stats) live-synced across every device signed into this group. This is entirely optional — everything else keeps working exactly the same without it.</p>
     <div id="codex-sync-status" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx3);margin-bottom:8px;letter-spacing:.03em;">Not connected</div>
     <div id="codex-sync-form">
       <input type="email" id="codex-sync-email" class="deck-input" placeholder="Deck Codex email" style="width:100%;margin-bottom:6px;" autocomplete="username">
@@ -1833,6 +1833,8 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
     <button class="secret-btn" id="codex-sync-signout-btn" style="width:100%;display:none;" onclick="codexSyncSignOut()">Disconnect</button>
     <div class="share-status" id="codex-sync-error" style="margin-top:6px;"></div>
     <div id="codex-sync-write-status" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);margin-top:6px;letter-spacing:.02em;line-height:1.5;"></div>
+    <div id="codex-sync-tracker-status" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);margin-top:4px;letter-spacing:.02em;line-height:1.5;"></div>
+    <div id="codex-sync-pending" style="display:none;font-family:'Crimson Pro',serif;font-size:11px;color:#e0a060;margin-top:8px;line-height:1.6;background:rgba(200,120,40,.08);border:1px solid rgba(200,120,40,.25);border-radius:8px;padding:8px 10px;"></div>
   </div>
 
   <!-- ── SAVE & TRANSFER ── -->
@@ -2052,7 +2054,38 @@ try{const raw=localStorage.getItem(CFG.storageKey);S=migrateState(raw?JSON.parse
 
 catch(e){S=defState()}
 
-function save(){try{localStorage.setItem(CFG.storageKey,JSON.stringify(S))}catch(_){}}
+function save(){
+  try{localStorage.setItem(CFG.storageKey,JSON.stringify(S))}catch(_){}
+  // Optional: if signed into Deck Codex, push the whole Tracker state
+  // (players, games, stats, decks — everything) so every device signed
+  // into this group sees the same data live, not just deck names/wins.
+  // No-ops harmlessly if not connected.
+  if(window.CodexSync && typeof window.CodexSync.scheduleTrackerStatePush==='function'){
+    window.CodexSync.scheduleTrackerStatePush(S);
+  }
+}
+
+// Called by the Firebase module when this device first connects to a group
+// that has no cloud Tracker state yet — this device's current local state
+// becomes the shared starting point for every other device that connects.
+window.getTrackerStateForCloudSeed = function(){ return S; };
+
+// Called by the Firebase module whenever a newer Tracker state arrives from
+// Firestore (another device made a change, or this device just connected
+// and pulled down the group's existing shared state). Applying it only
+// touches localStorage + in-memory S — it deliberately does NOT go through
+// save(), so receiving an update never re-triggers a push and can't loop.
+let _lastAppliedTrackerUpdatedAt=0;
+window.onCodexTrackerStateChange=function(remoteState, updatedAt){
+  if(updatedAt && updatedAt<=_lastAppliedTrackerUpdatedAt) return; // stale/out-of-order, ignore
+  _lastAppliedTrackerUpdatedAt=updatedAt||Date.now();
+  S=migrateState(remoteState);
+  try{localStorage.setItem(CFG.storageKey,JSON.stringify(S));}catch(_){}
+  if(typeof render==='function') render();
+  if(typeof reconcileLocalDecksWithCodex==='function') reconcileLocalDecksWithCodex();
+  if(typeof syncDeckStatsToFirestore==='function') syncDeckStatsToFirestore(S.players);
+  if(typeof refreshCodexSyncSettingsUI==='function') refreshCodexSyncSettingsUI();
+};
 
 let _skipMonthCheck=false;
 function checkMonth(){if(_skipMonthCheck){_skipMonthCheck=false;return;}const cur=ym();if(S.month<cur){const before=_captureState();triggerEOM(false,before);}}
@@ -2656,6 +2689,31 @@ function refreshCodexSyncSettingsUI(){
       writeStatusEl.textContent='';
     }
   }
+  const trackerStatusEl=document.getElementById('codex-sync-tracker-status');
+  if(trackerStatusEl){
+    if(cs&&cs.lastTrackerSyncError){
+      trackerStatusEl.style.color='#e06060';
+      trackerStatusEl.textContent=`⚠ Whole-Tracker sync failed: ${cs.lastTrackerSyncError}`;
+    }else if(cs&&cs.lastTrackerSyncAt){
+      trackerStatusEl.style.color='';
+      trackerStatusEl.textContent=`✓ Whole Tracker last synced at ${new Date(cs.lastTrackerSyncAt).toLocaleTimeString()}`;
+    }else{
+      trackerStatusEl.textContent='';
+    }
+  }
+  const pendingEl=document.getElementById('codex-sync-pending');
+  if(pendingEl){
+    const pending=(cs&&cs.pendingLocalDecks)||[];
+    if(pending.length){
+      pendingEl.style.display='block';
+      pendingEl.innerHTML='⚠ Not synced to Deck Codex yet:<br>'+pending.map(p=>
+        `&bull; <b>${p.deckName}</b> (${p.playerName}) — ${p.reason}`
+      ).join('<br>');
+    }else{
+      pendingEl.style.display='none';
+      pendingEl.innerHTML='';
+    }
+  }
 }
 
 async function codexSyncSignIn(){
@@ -2711,12 +2769,23 @@ async function reconcileLocalDecksWithCodex(){
   if(!window.CodexSync||!window.CodexSync.ready) return;
   _reconcilingCodexDecks=true;
   let changed=false;
+  // Every deck that's still stuck local-only after this pass, and *why* —
+  // surfaced in Settings so a permission/name mismatch is visible instead
+  // of the deck just silently never showing up on Codex.
+  const pending=[];
   try{
     for(const playerName of Object.keys(S.decks||{})){
       const localList=S.decks[playerName]||[];
       if(!localList.length) continue;
       if(!window.CodexSync.canPushFor(playerName)){
-        continue; // can't push, and can't confirm Codex state either — leave local as-is
+        // can't push, and can't confirm Codex state either — leave local as-is,
+        // but say so, since this used to fail silently forever.
+        localList.forEach(d=>{
+          const nm=deckName(d);
+          if(nm) pending.push({playerName,deckName:nm,
+            reason:`No Deck Codex member named "${playerName}" (exact match, case-insensitive) — rename the player here to match their Codex display name, or ask the group leader to check.`});
+        });
+        continue;
       }
       const syncedNames=new Set(codexSyncedDecksFor(playerName).map(d=>(d.name||'').trim().toLowerCase()));
       const kept=[];
@@ -2736,11 +2805,14 @@ async function reconcileLocalDecksWithCodex(){
         }catch(e){
           console.error('Could not push local deck to Deck Codex', e);
           kept.push(d); // push failed, so keep the only copy that exists
+          pending.push({playerName,deckName:nm,reason:(e&&e.message)||'Could not sync to Deck Codex — check your connection and try again.'});
         }
       }
       if(kept.length !== localList.length) S.decks[playerName]=kept;
     }
     if(changed){ save(); renderDecksPanel(); }
+    if(window.CodexSync) window.CodexSync.pendingLocalDecks=pending;
+    if(typeof refreshCodexSyncSettingsUI==='function') refreshCodexSyncSettingsUI();
   } finally {
     _reconcilingCodexDecks=false;
   }
@@ -5579,6 +5651,14 @@ function epRemoveCancel(){
   let currentGroupId = null;
   let myUid = null;
   let isLeaderFlag = false;
+  // Whole-Tracker live sync (players/games/stats — not just decks). One doc
+  // per group holds the entire tracker state; every device signed into the
+  // group listens to it and pushes to it, so it becomes the shared source
+  // of truth instead of each device's localStorage being an island.
+  let trackerStateRef = null;
+  let unsubscribeTrackerState = null;
+  let _lastPushedTrackerAt = 0;
+  let _trackerPushTimer = null;
   // Lowercased Deck Codex display name -> { uid, displayName }. Lets a
   // locally-added Tracker deck (keyed only by player name, a plain string)
   // be matched to the actual Codex member it belongs to when pushing it up.
@@ -5599,6 +5679,9 @@ function epRemoveCancel(){
   function stopSyncing(){
     if(unsubscribeDecks){ unsubscribeDecks(); unsubscribeDecks = null; }
     if(unsubscribeMembers){ unsubscribeMembers(); unsubscribeMembers = null; }
+    if(unsubscribeTrackerState){ unsubscribeTrackerState(); unsubscribeTrackerState = null; }
+    clearTimeout(_trackerPushTimer);
+    trackerStateRef = null;
     groupDecksCol = null;
     currentGroupId = null;
     myUid = null;
@@ -5608,6 +5691,8 @@ function epRemoveCancel(){
     window.CodexSync.decksByOwner = {};
     window.CodexSync.lastStatsError = null;
     window.CodexSync.lastStatsSyncAt = null;
+    window.CodexSync.lastTrackerSyncError = null;
+    window.CodexSync.pendingLocalDecks = [];
     notify();
   }
 
@@ -5641,6 +5726,34 @@ function epRemoveCancel(){
       }
       currentGroupId = groupId;
       groupDecksCol = collection(db, 'groups', groupId, 'decks');
+
+      // Whole-Tracker state doc for this group. If it doesn't exist yet,
+      // this is the first device ever to connect this group — seed the
+      // cloud from whatever's on this device right now. If it does exist,
+      // the cloud copy always wins on connect (it's the shared truth), even
+      // if that means this device's local copy gets replaced — same as
+      // opening a shared doc for the first time on a new device.
+      trackerStateRef = doc(db, 'groups', groupId, 'trackerState', 'main');
+      unsubscribeTrackerState = onSnapshot(trackerStateRef, (snap)=>{
+        if(!snap.exists()){
+          if(typeof window.getTrackerStateForCloudSeed === 'function'){
+            pushTrackerStateNow(window.getTrackerStateForCloudSeed());
+          }
+          return;
+        }
+        const data = snap.data();
+        if(data && data.updatedAt === _lastPushedTrackerAt) return; // our own write echoing back, already applied
+        window.CodexSync.lastTrackerSyncAt = Date.now();
+        window.CodexSync.lastTrackerSyncError = null;
+        if(data && typeof window.onCodexTrackerStateChange === 'function'){
+          window.onCodexTrackerStateChange(data.state, data.updatedAt);
+        }
+        notify();
+      }, (err)=>{
+        console.error('Deck Codex tracker-state sync error', err);
+        window.CodexSync.lastTrackerSyncError = (err && (err.code || err.message)) || String(err);
+        notify();
+      });
 
       // Needed so a locally-added deck can be attributed to the right
       // member (and so we know whether this signed-in account is even
@@ -5688,6 +5801,21 @@ function epRemoveCancel(){
     }
   }
 
+  function pushTrackerStateNow(stateObj){
+    if(!trackerStateRef) return;
+    const now = Date.now();
+    _lastPushedTrackerAt = now;
+    setDoc(trackerStateRef, { state: stateObj, updatedAt: now }).then(()=>{
+      window.CodexSync.lastTrackerSyncAt = now;
+      window.CodexSync.lastTrackerSyncError = null;
+      notify();
+    }).catch(e=>{
+      console.error('Could not push Tracker state to Deck Codex', e);
+      window.CodexSync.lastTrackerSyncError = (e && (e.code || e.message)) || String(e);
+      notify();
+    });
+  }
+
   window.CodexSync = {
     ready: false,
     connecting: false,
@@ -5695,7 +5823,18 @@ function epRemoveCancel(){
     lastError: null,
     lastStatsError: null,
     lastStatsSyncAt: null,
+    lastTrackerSyncAt: null,
+    lastTrackerSyncError: null,
+    pendingLocalDecks: [],
     decksByOwner: {},
+    // Debounced whole-Tracker push — batches rapid local edits (e.g. logging
+    // a game touches several fields at once) into a single write ~500ms
+    // after the last change, instead of hammering Firestore per keystroke.
+    scheduleTrackerStatePush(stateObj){
+      if(!trackerStateRef) return; // not connected — no-op, localStorage-only behavior unchanged
+      clearTimeout(_trackerPushTimer);
+      _trackerPushTimer = setTimeout(()=>{ pushTrackerStateNow(stateObj); }, 500);
+    },
     decksForPlayer(name){
       return this.decksByOwner[(name || '').trim().toLowerCase()] || [];
     },
