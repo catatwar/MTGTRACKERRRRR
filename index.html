@@ -1823,7 +1823,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   <!-- ── DECK CODEX SYNC ── -->
   <div class="settings-section">
     <div class="settings-section-title">🔗 Deck Codex Sync</div>
-    <p style="font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Sign in with your Deck Codex account to see shared decks here, keep win/loss records in sync between both apps, and keep your whole Tracker (players, games, stats) live-synced across every device signed into this group. This is entirely optional — everything else keeps working exactly the same without it.</p>
+    <p style="font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Sign in with your Deck Codex account to keep decks and win/loss records in sync between both apps, live in both directions. This is entirely optional — everything else keeps working exactly the same without it.</p>
     <div id="codex-sync-status" style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx3);margin-bottom:8px;letter-spacing:.03em;">Not connected</div>
     <div id="codex-sync-form">
       <input type="email" id="codex-sync-email" class="deck-input" placeholder="Deck Codex email" style="width:100%;margin-bottom:6px;" autocomplete="username">
@@ -1833,7 +1833,6 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
     <button class="secret-btn" id="codex-sync-signout-btn" style="width:100%;display:none;" onclick="codexSyncSignOut()">Disconnect</button>
     <div class="share-status" id="codex-sync-error" style="margin-top:6px;"></div>
     <div id="codex-sync-write-status" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);margin-top:6px;letter-spacing:.02em;line-height:1.5;"></div>
-    <div id="codex-sync-tracker-status" style="font-family:'Cinzel',serif;font-size:9px;color:var(--tx3);margin-top:4px;letter-spacing:.02em;line-height:1.5;"></div>
     <div id="codex-sync-pending" style="display:none;font-family:'Crimson Pro',serif;font-size:11px;color:#e0a060;margin-top:8px;line-height:1.6;background:rgba(200,120,40,.08);border:1px solid rgba(200,120,40,.25);border-radius:8px;padding:8px 10px;"></div>
   </div>
 
@@ -2054,66 +2053,7 @@ try{const raw=localStorage.getItem(CFG.storageKey);S=migrateState(raw?JSON.parse
 
 catch(e){S=defState()}
 
-function save(){
-  try{localStorage.setItem(CFG.storageKey,JSON.stringify(S))}catch(_){}
-  // Stamp the moment of this local edit so a reconnecting device can tell
-  // whether ITS copy is newer than whatever's in the cloud, instead of
-  // always blindly accepting the cloud copy (which was silently discarding
-  // fresh local changes made right before/while reconnecting).
-  try{localStorage.setItem(CFG.storageKey+'__ts', String(Date.now()));}catch(_){}
-  // Optional: if signed into Deck Codex, push the whole Tracker state
-  // (players, games, stats, decks — everything) so every device signed
-  // into this group sees the same data live, not just deck names/wins.
-  // No-ops harmlessly if not connected.
-  if(window.CodexSync && typeof window.CodexSync.scheduleTrackerStatePush==='function'){
-    window.CodexSync.scheduleTrackerStatePush(S);
-  }
-}
-
-function _localTrackerStateTs(){
-  try{ return parseInt(localStorage.getItem(CFG.storageKey+'__ts')||'0',10)||0; }catch(_){ return 0; }
-}
-// Read by the Firebase module on connect/reconnect to decide whether this
-// device's local copy is newer than the cloud's — and if so, push it up
-// instead of letting an older cloud copy silently clobber it.
-window.getLocalTrackerStateTs = _localTrackerStateTs;
-
-// Called by the Firebase module when this device first connects to a group
-// that has no cloud Tracker state yet (or when this device's local copy
-// turns out to be newer than the cloud's) — this device's current state
-// becomes the shared version every other device converges on.
-// playerPhotos/customPalettes/playerIcons are deliberately left out: they're
-// per-device cosmetic choices, not the shared win-rate/deck data, and
-// photos in particular are base64 strings that can push a document over
-// Firestore's 1MiB limit and make every push silently fail from then on.
-// Round-tripping through JSON also drops any stray `undefined` values,
-// which Firestore's SDK otherwise rejects the entire write for.
-window.getTrackerStateForCloudSeed = function(){
-  const {playerPhotos, customPalettes, playerIcons, ...shared} = S;
-  return JSON.parse(JSON.stringify(shared));
-};
-
-// Called by the Firebase module whenever a newer Tracker state arrives from
-// Firestore (another device made a change, or this device just connected
-// and pulled down the group's existing shared state). Applying it only
-// touches localStorage + in-memory S — it deliberately does NOT go through
-// save(), so receiving an update never re-triggers a push and can't loop.
-// Merges the incoming shared fields onto this device's own existing
-// cosmetic fields (photos/palettes/icons aren't part of what's synced, so
-// a wholesale S = migrateState(remoteState) would otherwise wipe them).
-let _lastAppliedTrackerUpdatedAt=0;
-window.onCodexTrackerStateChange=function(remoteState, updatedAt){
-  if(updatedAt && updatedAt<=_lastAppliedTrackerUpdatedAt) return; // stale/out-of-order, ignore
-  _lastAppliedTrackerUpdatedAt=updatedAt||Date.now();
-  const keepPhotos=S.playerPhotos, keepPalettes=S.customPalettes, keepIcons=S.playerIcons;
-  S=migrateState({...remoteState, playerPhotos:keepPhotos, customPalettes:keepPalettes, playerIcons:keepIcons});
-  try{localStorage.setItem(CFG.storageKey,JSON.stringify(S));}catch(_){}
-  try{localStorage.setItem(CFG.storageKey+'__ts', String(_lastAppliedTrackerUpdatedAt));}catch(_){}
-  if(typeof render==='function') render();
-  if(typeof reconcileLocalDecksWithCodex==='function') reconcileLocalDecksWithCodex();
-  if(typeof syncDeckStatsToFirestore==='function') syncDeckStatsToFirestore(S.players);
-  if(typeof refreshCodexSyncSettingsUI==='function') refreshCodexSyncSettingsUI();
-};
+function save(){try{localStorage.setItem(CFG.storageKey,JSON.stringify(S))}catch(_){}}
 
 let _skipMonthCheck=false;
 function checkMonth(){if(_skipMonthCheck){_skipMonthCheck=false;return;}const cur=ym();if(S.month<cur){const before=_captureState();triggerEOM(false,before);}}
@@ -2500,10 +2440,11 @@ function renderDecksPanel(){
     listWrap.innerHTML='<div class="deck-list"><div class="deck-empty">No decks added yet.</div></div>';
   } else {
     // One combined list: locally-added decks and Deck Codex-synced decks
-    // sit together, with synced entries marked by a small 🔗 badge instead
-    // of living in a separate section. Deck management (add/edit/delete)
-    // happens in Deck Codex now — this view is read-only, so there's no
-    // edit/remove control on either kind of row.
+    // sit together, with synced entries marked by a small 🔗 badge. Synced
+    // rows get their own edit/delete controls (shown only when this
+    // signed-in account is actually allowed to make that change) which
+    // write straight to the same Firestore doc Deck Codex itself reads and
+    // writes — there's no separate local copy to fall out of sync.
     // Defensive de-dupe: a local deck sharing a name (case-insensitive)
     // with an already-synced deck is skipped here too, in case it hasn't
     // been cleaned out of local storage yet by reconcileLocalDecksWithCodex.
@@ -2517,7 +2458,11 @@ function renderDecksPanel(){
       .map(({d,i})=>{
         const nm=deckName(d);const col=deckColor(d);
         const pips=col&&col.length?[...col].map(id=>{const c=DECK_COLORS.find(x=>x.id===id);return c?`<span style="display:inline-flex;flex-shrink:0;">${c.render(20)}</span>`:''}).join(''):`<span style="font-size:16px">🃏</span>`;
-        return`<div class="deck-entry"><button class="deck-view-btn" onclick="openDeckInfo('${ESC(_deckSelPlayer)}',${i})" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(nm)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div></div>`;
+        const rmStep=_deckRemoveStep[i]||0;
+        const rmLabel=rmStep===0?'✕':(rmStep===1?'?':'!');
+        const rmTitle=rmStep===0?'Delete deck':(rmStep===1?'Tap again to confirm':'Tap once more to delete');
+        const cancelBtn=rmStep>0?`<button class="deck-view-btn" onclick="cancelRemoveDeck()" title="Cancel" style="border-color:rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--tx3);">✕</button>`:'';
+        return`<div class="deck-entry"><button class="deck-view-btn" onclick="openDeckInfo('${ESC(_deckSelPlayer)}',${i})" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(nm)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><button class="deck-view-btn" onclick="openEditDeck(${i})" title="Edit deck" style="border-color:rgba(212,168,67,.35);background:rgba(212,168,67,.08);color:var(--gold);">✎</button>${cancelBtn}<button class="deck-view-btn" onclick="removeDeck(${i})" title="${rmTitle}" style="border-color:rgba(200,60,60,.35);background:rgba(200,60,60,.08);color:#e06060;">${rmLabel}</button></div></div>`;
       }).join('');
     const syncedRows=syncedDecks.map(d=>{
       const pips=d.colors&&d.colors.length?d.colors.map(id=>{const c=DECK_COLORS.find(x=>x.id===id);return c?`<span style="display:inline-flex;flex-shrink:0;">${c.render(20)}</span>`:''}).join(''):`<span style="font-size:16px">🃏</span>`;
@@ -2528,7 +2473,16 @@ function renderDecksPanel(){
       });
       const wr=games>0?Math.round(wins/games*100):0;
       const recordText=games>0?`${wins} – ${games-wins} (${wr}%)`:'No games yet';
-      return`<div class="deck-entry"><button class="deck-view-btn" onclick="openSyncedDeckInfo('${ESC(_deckSelPlayer)}','${ESC(d.id)}')" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span title="Synced from Deck Codex" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;flex-shrink:0;background:rgba(100,160,255,.15);border:1px solid rgba(100,160,255,.35);font-size:9px;">🔗</span><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(d.name)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div><span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;">${recordText}</span></div>`;
+      const canEdit=!!(window.CodexSync && window.CodexSync.canEditDeck(d));
+      let editControls='';
+      if(canEdit){
+        const rmStep=_deckRemoveSyncedStep[d.id]||0;
+        const rmLabel=rmStep===0?'✕':(rmStep===1?'?':'!');
+        const rmTitle=rmStep===0?'Delete deck (on Deck Codex too)':(rmStep===1?'Tap again to confirm':'Tap once more to delete');
+        const cancelBtn=rmStep>0?`<button class="deck-view-btn" onclick="cancelRemoveSyncedDeck()" title="Cancel" style="border-color:rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--tx3);">✕</button>`:'';
+        editControls=`<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><button class="deck-view-btn" onclick="openEditSyncedDeck('${ESC(d.id)}')" title="Edit deck (on Deck Codex too)" style="border-color:rgba(212,168,67,.35);background:rgba(212,168,67,.08);color:var(--gold);">✎</button>${cancelBtn}<button class="deck-view-btn" onclick="removeSyncedDeck('${ESC(d.id)}')" title="${rmTitle}" style="border-color:rgba(200,60,60,.35);background:rgba(200,60,60,.08);color:#e06060;">${rmLabel}</button></div>`;
+      }
+      return`<div class="deck-entry"><button class="deck-view-btn" onclick="openSyncedDeckInfo('${ESC(_deckSelPlayer)}','${ESC(d.id)}')" title="Deck info">i</button><div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin:0 10px"><span title="Synced from Deck Codex" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;flex-shrink:0;background:rgba(100,160,255,.15);border:1px solid rgba(100,160,255,.35);font-size:9px;">🔗</span><span class="deck-entry-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ESC(d.name)}</span><span style="display:inline-flex;align-items:center;gap:3px;flex-shrink:0">${pips}</span></div><span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;margin-right:6px;">${recordText}</span>${editControls}</div>`;
     }).join('');
     listWrap.innerHTML=`<div class="deck-list">${localRows}${syncedRows}</div>`;
   }
@@ -2570,6 +2524,7 @@ function selectDeckPlayer(name){
 
 function toggleDeckInput(){
   _deckEditIdx=-1;
+  _deckEditSyncedId=null;
   _deckShowInput=!_deckShowInput;
   const ir=document.getElementById('deck-input-row');
   if(ir) ir.style.display=_deckShowInput?'block':'none';
@@ -2592,6 +2547,7 @@ function openEditDeck(idx){
   const d=S.decks[_deckSelPlayer][idx];
   if(!d) return;
   _deckEditIdx=idx;
+  _deckEditSyncedId=null;
   _deckShowInput=true;
   _deckRemoveStep={};
   const ir=document.getElementById('deck-input-row');
@@ -2609,7 +2565,34 @@ function openEditDeck(idx){
   ir.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-function confirmAddDeck(){
+// Editing a deck that lives on Deck Codex — pre-fills the same add/edit
+// form, but confirmAddDeck() below will write straight to Firestore for
+// this one instead of touching S.decks, since there's no local copy of a
+// synced deck to keep in step separately.
+function openEditSyncedDeck(deckId){
+  if(!_deckSelPlayer||!window.CodexSync) return;
+  const d=codexSyncedDecksFor(_deckSelPlayer).find(x=>x.id===deckId);
+  if(!d||!window.CodexSync.canEditDeck(d)) return;
+  _deckEditIdx=-1;
+  _deckEditSyncedId=deckId;
+  _deckShowInput=true;
+  _deckRemoveSyncedStep={};
+  const ir=document.getElementById('deck-input-row');
+  if(ir) ir.style.display='block';
+  const confirmBtn=document.getElementById('deck-confirm-btn');
+  if(confirmBtn) confirmBtn.textContent='Save Changes';
+  const inp=document.getElementById('deck-name-input');
+  if(inp) inp.value=d.name||'';
+  const desc=document.getElementById('deck-desc-input');
+  if(desc) desc.value=d.description||'';
+  const typeEl=document.getElementById('deck-type-select');
+  if(typeEl) typeEl.value=window.CodexSync.mapDeckTypeFromCodex(d.buildType);
+  _deckSelColors=Array.isArray(d.colors)?d.colors.slice():[];
+  _renderColorRow();
+  ir.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function confirmAddDeck(){
   if(!_deckSelPlayer)return;
   const inp=document.getElementById('deck-name-input');
   const descEl=document.getElementById('deck-desc-input');
@@ -2629,41 +2612,64 @@ function confirmAddDeck(){
     if(deckTypeEl){deckTypeEl.style.outline='2px solid rgba(200,60,60,.5)';deckTypeEl.style.borderRadius='7px';setTimeout(()=>{deckTypeEl.style.outline='';},1200);}
     return;
   }
-  if(!S.decks)S.decks={};
-  if(!S.decks[_deckSelPlayer])S.decks[_deckSelPlayer]=[];
 
-  if(_deckEditIdx>=0){
-    // Editing existing deck
-    const existing=S.decks[_deckSelPlayer][_deckEditIdx];
-    const oldName=deckName(existing);
-    const updatedDeck={name, description, color:_deckSelColors.join(''), deckType:dt};
-    S.decks[_deckSelPlayer][_deckEditIdx]=updatedDeck;
-    // Update log entries referencing the old deck name
-    if(oldName!==name){
-      (S.log||[]).forEach(g=>{
-        if(g.winner===_deckSelPlayer&&g.deck===oldName) g.deck=name;
+  if(_deckEditSyncedId){
+    // This deck lives on Deck Codex — write straight to the same Firestore
+    // doc Deck Codex itself reads and writes. No local copy to update;
+    // the write IS the sync, live in both apps the instant it commits.
+    const confirmBtn=document.getElementById('deck-confirm-btn');
+    if(confirmBtn){ confirmBtn.disabled=true; confirmBtn.textContent='Saving…'; }
+    try{
+      await window.CodexSync.updateDeckFields(_deckEditSyncedId, {
+        name, description,
+        colors: _deckSelColors.slice(),
+        colorless: _deckSelColors.length===0,
+        buildType: window.CodexSync.mapDeckTypeToCodex(dt)
       });
+    }catch(e){
+      if(confirmBtn){ confirmBtn.disabled=false; confirmBtn.textContent='Save Changes'; }
+      alert("Couldn't save to Deck Codex: "+((e&&(e.code||e.message))||String(e)));
+      return; // keep the form open — nothing should look saved when it wasn't
     }
-    _deckEditIdx=-1;
+    _deckEditSyncedId=null;
   } else {
-    // Adding new deck
-    const existingNames=S.decks[_deckSelPlayer].map(x=>deckName(x).toLowerCase());
-    if(existingNames.includes(name.toLowerCase())){inp.value='';return;}
-    S.decks[_deckSelPlayer].push({name, description, color:_deckSelColors.join(''), deckType:dt});
+    if(!S.decks)S.decks={};
+    if(!S.decks[_deckSelPlayer])S.decks[_deckSelPlayer]=[];
+    if(_deckEditIdx>=0){
+      // Editing existing local deck
+      const existing=S.decks[_deckSelPlayer][_deckEditIdx];
+      const oldName=deckName(existing);
+      const updatedDeck={name, description, color:_deckSelColors.join(''), deckType:dt};
+      S.decks[_deckSelPlayer][_deckEditIdx]=updatedDeck;
+      // Update log entries referencing the old deck name
+      if(oldName!==name){
+        (S.log||[]).forEach(g=>{
+          if(g.winner===_deckSelPlayer&&g.deck===oldName) g.deck=name;
+        });
+      }
+      _deckEditIdx=-1;
+    } else {
+      // Adding new local deck
+      const existingNames=S.decks[_deckSelPlayer].map(x=>deckName(x).toLowerCase());
+      if(existingNames.includes(name.toLowerCase())){inp.value='';return;}
+      S.decks[_deckSelPlayer].push({name, description, color:_deckSelColors.join(''), deckType:dt});
+    }
+    save();
   }
 
-  save();
   inp.value='';descEl.value='';_deckSelColors=[];_deckShowInput=false;
   const ir=document.getElementById('deck-input-row');
   if(ir) ir.style.display='none';
   const confirmBtn=document.getElementById('deck-confirm-btn');
-  if(confirmBtn) confirmBtn.textContent='Add Deck';
+  if(confirmBtn){ confirmBtn.disabled=false; confirmBtn.textContent='Add Deck'; }
   renderDecksPanel();
   if(typeof reconcileLocalDecksWithCodex === 'function') reconcileLocalDecksWithCodex();
 }
 
-let _deckEditIdx=-1; // -1 = not editing, else index of deck being edited
+let _deckEditIdx=-1; // -1 = not editing, else index of a local deck being edited
+let _deckEditSyncedId=null; // set instead of _deckEditIdx when editing a Deck-Codex-synced deck
 let _deckRemoveStep={};
+let _deckRemoveSyncedStep={};
 function removeDeck(idx){
   if(!_deckSelPlayer||!S.decks||!S.decks[_deckSelPlayer])return;
   const step=_deckRemoveStep[idx]||0;
@@ -2675,13 +2681,33 @@ function removeDeck(idx){
 }
 function cancelRemoveDeck(){_deckRemoveStep={};renderDecksPanel();}
 
+// Deletes a deck straight out of Deck Codex's own Firestore doc — same
+// three-tap confirm pattern as removeDeck() above, just aimed at the
+// shared cloud doc instead of a local array.
+async function removeSyncedDeck(deckId){
+  if(!_deckSelPlayer||!window.CodexSync) return;
+  const step=_deckRemoveSyncedStep[deckId]||0;
+  if(step===0){_deckRemoveSyncedStep={[deckId]:1};renderDecksPanel();return;}
+  if(step===1){_deckRemoveSyncedStep={[deckId]:2};renderDecksPanel();return;}
+  _deckRemoveSyncedStep={};
+  try{
+    await window.CodexSync.deleteDeck(deckId);
+  }catch(e){
+    alert("Couldn't delete on Deck Codex: "+((e&&(e.code||e.message))||String(e)));
+  }
+  renderDecksPanel();
+}
+function cancelRemoveSyncedDeck(){_deckRemoveSyncedStep={};renderDecksPanel();}
+
 /* ═══ DECK CODEX SYNC (optional) ══════════════════════════
    Synced decks are held entirely in window.CodexSync.decksByOwner —
    never written into S.decks or localStorage — on purpose. That means
    Save Code export/import (and everything else in this file) can't
    touch them even by accident; they're always freshly read from
-   Firestore. Codex owns name/description/colors/type for these decks;
-   this tracker only ever writes their wins/losses. */
+   Firestore. Editing a synced deck's name/description/colors/type from
+   this Tracker (see openEditSyncedDeck/confirmAddDeck/removeSyncedDeck)
+   writes straight to that same Firestore doc — there is exactly one copy
+   of a synced deck's data, and both apps read and write it live. */
 
 function codexSyncedDecksFor(playerName){
   if(!window.CodexSync) return [];
@@ -2715,18 +2741,6 @@ function refreshCodexSyncSettingsUI(){
       writeStatusEl.textContent=`✓ Win/loss last synced to Deck Codex at ${new Date(cs.lastStatsSyncAt).toLocaleTimeString()}`;
     }else{
       writeStatusEl.textContent='';
-    }
-  }
-  const trackerStatusEl=document.getElementById('codex-sync-tracker-status');
-  if(trackerStatusEl){
-    if(cs&&cs.lastTrackerSyncError){
-      trackerStatusEl.style.color='#e06060';
-      trackerStatusEl.textContent=`⚠ Whole-Tracker sync failed: ${cs.lastTrackerSyncError}`;
-    }else if(cs&&cs.lastTrackerSyncAt){
-      trackerStatusEl.style.color='';
-      trackerStatusEl.textContent=`✓ Whole Tracker last synced at ${new Date(cs.lastTrackerSyncAt).toLocaleTimeString()}`;
-    }else{
-      trackerStatusEl.textContent='';
     }
   }
   const pendingEl=document.getElementById('codex-sync-pending');
@@ -5651,7 +5665,7 @@ function epRemoveCancel(){
     signInWithEmailAndPassword, signOut
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
   import {
-    getFirestore, collection, collectionGroup, doc, query, where, getDocs, getDoc, setDoc, onSnapshot, updateDoc
+    getFirestore, collection, collectionGroup, doc, query, where, getDocs, getDoc, setDoc, onSnapshot, updateDoc, deleteDoc
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
   // Same Firebase project Deck Codex uses — this is what makes the two
@@ -5679,14 +5693,6 @@ function epRemoveCancel(){
   let currentGroupId = null;
   let myUid = null;
   let isLeaderFlag = false;
-  // Whole-Tracker live sync (players/games/stats — not just decks). One doc
-  // per group holds the entire tracker state; every device signed into the
-  // group listens to it and pushes to it, so it becomes the shared source
-  // of truth instead of each device's localStorage being an island.
-  let trackerStateRef = null;
-  let unsubscribeTrackerState = null;
-  let _lastPushedTrackerAt = 0;
-  let _trackerPushTimer = null;
   // Lowercased Deck Codex display name -> { uid, displayName }. Lets a
   // locally-added Tracker deck (keyed only by player name, a plain string)
   // be matched to the actual Codex member it belongs to when pushing it up.
@@ -5696,6 +5702,7 @@ function epRemoveCancel(){
   // 1:1 — closest equivalents are mapped here; anything else maps to null
   // (Codex allows an unset buildType).
   const TRACKER_TO_CODEX_BUILDTYPE = { Precon: 'precon', Edited: 'edited', Custom: 'homemade' };
+  const CODEX_TO_TRACKER_BUILDTYPE = { precon: 'Precon', edited: 'Edited', homemade: 'Custom' };
 
   function notify(){
     // Defined on the plain-script side, once page scripts have run. Guarded
@@ -5707,9 +5714,6 @@ function epRemoveCancel(){
   function stopSyncing(){
     if(unsubscribeDecks){ unsubscribeDecks(); unsubscribeDecks = null; }
     if(unsubscribeMembers){ unsubscribeMembers(); unsubscribeMembers = null; }
-    if(unsubscribeTrackerState){ unsubscribeTrackerState(); unsubscribeTrackerState = null; }
-    clearTimeout(_trackerPushTimer);
-    trackerStateRef = null;
     groupDecksCol = null;
     currentGroupId = null;
     myUid = null;
@@ -5719,7 +5723,6 @@ function epRemoveCancel(){
     window.CodexSync.decksByOwner = {};
     window.CodexSync.lastStatsError = null;
     window.CodexSync.lastStatsSyncAt = null;
-    window.CodexSync.lastTrackerSyncError = null;
     window.CodexSync.pendingLocalDecks = [];
     notify();
   }
@@ -5754,47 +5757,6 @@ function epRemoveCancel(){
       }
       currentGroupId = groupId;
       groupDecksCol = collection(db, 'groups', groupId, 'decks');
-
-      // Whole-Tracker state doc for this group. If it doesn't exist yet,
-      // this is the first device ever to connect this group — seed the
-      // cloud from whatever's on this device right now. If it does exist,
-      // the cloud copy always wins on connect (it's the shared truth), even
-      // if that means this device's local copy gets replaced — same as
-      // opening a shared doc for the first time on a new device.
-      trackerStateRef = doc(db, 'groups', groupId, 'trackerState', 'main');
-      unsubscribeTrackerState = onSnapshot(trackerStateRef, (snap)=>{
-        if(!snap.exists()){
-          if(typeof window.getTrackerStateForCloudSeed === 'function'){
-            pushTrackerStateNow(window.getTrackerStateForCloudSeed());
-          }
-          return;
-        }
-        const data = snap.data();
-        const cloudTs = (data && typeof data.updatedAt === 'number') ? data.updatedAt : 0;
-        if(cloudTs === _lastPushedTrackerAt) return; // our own write echoing back, already applied
-        window.CodexSync.lastTrackerSyncAt = Date.now();
-        window.CodexSync.lastTrackerSyncError = null;
-        const localTs = (typeof window.getLocalTrackerStateTs === 'function') ? window.getLocalTrackerStateTs() : 0;
-        if(cloudTs > localTs){
-          if(data && typeof window.onCodexTrackerStateChange === 'function'){
-            window.onCodexTrackerStateChange(data.state, cloudTs);
-          }
-        }else if(localTs > cloudTs){
-          // This device's local copy is newer — e.g. it made edits just
-          // before reconnecting, or while offline. Don't clobber it with
-          // the older cloud copy; push it up instead so the cloud (and
-          // every other device) catches up to it. This is exactly the case
-          // that used to silently erase fresh local changes on reconnect.
-          if(typeof window.getTrackerStateForCloudSeed === 'function'){
-            pushTrackerStateNow(window.getTrackerStateForCloudSeed());
-          }
-        }
-        notify();
-      }, (err)=>{
-        console.error('Deck Codex tracker-state sync error', err);
-        window.CodexSync.lastTrackerSyncError = (err && (err.code || err.message)) || String(err);
-        notify();
-      });
 
       // Needed so a locally-added deck can be attributed to the right
       // member (and so we know whether this signed-in account is even
@@ -5842,21 +5804,6 @@ function epRemoveCancel(){
     }
   }
 
-  function pushTrackerStateNow(stateObj){
-    if(!trackerStateRef) return;
-    const now = Date.now();
-    _lastPushedTrackerAt = now;
-    setDoc(trackerStateRef, { state: stateObj, updatedAt: now }).then(()=>{
-      window.CodexSync.lastTrackerSyncAt = now;
-      window.CodexSync.lastTrackerSyncError = null;
-      notify();
-    }).catch(e=>{
-      console.error('Could not push Tracker state to Deck Codex', e);
-      window.CodexSync.lastTrackerSyncError = (e && (e.code || e.message)) || String(e);
-      notify();
-    });
-  }
-
   window.CodexSync = {
     ready: false,
     connecting: false,
@@ -5864,26 +5811,8 @@ function epRemoveCancel(){
     lastError: null,
     lastStatsError: null,
     lastStatsSyncAt: null,
-    lastTrackerSyncAt: null,
-    lastTrackerSyncError: null,
     pendingLocalDecks: [],
     decksByOwner: {},
-    // Debounced whole-Tracker push — batches rapid local edits (e.g. logging
-    // a game touches several fields at once) into a single write ~500ms
-    // after the last change, instead of hammering Firestore per keystroke.
-    scheduleTrackerStatePush(stateObj){
-      if(!trackerStateRef) return; // not connected — no-op, localStorage-only behavior unchanged
-      clearTimeout(_trackerPushTimer);
-      _trackerPushTimer = setTimeout(()=>{
-        // Always re-sanitize at push time (strip cosmetic fields + any
-        // stray `undefined`s) rather than trusting whatever was handed in
-        // — this is the one place a bad payload would actually hit
-        // Firestore and silently fail every write from then on.
-        const payload = (typeof window.getTrackerStateForCloudSeed === 'function')
-          ? window.getTrackerStateForCloudSeed() : stateObj;
-        pushTrackerStateNow(payload);
-      }, 500);
-    },
     decksForPlayer(name){
       return this.decksByOwner[(name || '').trim().toLowerCase()] || [];
     },
@@ -5938,6 +5867,28 @@ function epRemoveCancel(){
       if(!entry) return false;
       return isLeaderFlag || entry.uid === myUid;
     },
+    // Mirrors Deck Codex's own canEditDeck(): the leader can edit/delete any
+    // deck in the group; a regular member only their own. Used to decide
+    // whether to show edit/delete controls on a synced deck row at all —
+    // matches the Firestore rule exactly, so the button is only ever shown
+    // when the write would actually be allowed.
+    canEditDeck(deck){
+      if(!deck) return false;
+      return isLeaderFlag || deck.ownerUid === myUid;
+    },
+    // Writes straight to the same deck doc Deck Codex itself reads/writes —
+    // there's no separate Tracker-side copy of a synced deck to keep in
+    // sync; editing IS the Firestore write, live in both apps immediately.
+    async updateDeckFields(deckId, fields){
+      if(!groupDecksCol) throw new Error('Not connected to a Deck Codex group.');
+      await updateDoc(doc(groupDecksCol, deckId), fields);
+    },
+    async deleteDeck(deckId){
+      if(!groupDecksCol) throw new Error('Not connected to a Deck Codex group.');
+      await deleteDoc(doc(groupDecksCol, deckId));
+    },
+    mapDeckTypeToCodex(dt){ return TRACKER_TO_CODEX_BUILDTYPE[dt] || null; },
+    mapDeckTypeFromCodex(bt){ return CODEX_TO_TRACKER_BUILDTYPE[bt] || ''; },
     // Creates a brand-new deck doc in Deck Codex for a deck that currently
     // only exists in this Tracker's local storage, attributed to whichever
     // group member playerName matches. Filed into that member's personal
