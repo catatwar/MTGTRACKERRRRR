@@ -2056,6 +2056,11 @@ catch(e){S=defState()}
 
 function save(){
   try{localStorage.setItem(CFG.storageKey,JSON.stringify(S))}catch(_){}
+  // Stamp the moment of this local edit so a reconnecting device can tell
+  // whether ITS copy is newer than whatever's in the cloud, instead of
+  // always blindly accepting the cloud copy (which was silently discarding
+  // fresh local changes made right before/while reconnecting).
+  try{localStorage.setItem(CFG.storageKey+'__ts', String(Date.now()));}catch(_){}
   // Optional: if signed into Deck Codex, push the whole Tracker state
   // (players, games, stats, decks — everything) so every device signed
   // into this group sees the same data live, not just deck names/wins.
@@ -2065,22 +2070,45 @@ function save(){
   }
 }
 
+function _localTrackerStateTs(){
+  try{ return parseInt(localStorage.getItem(CFG.storageKey+'__ts')||'0',10)||0; }catch(_){ return 0; }
+}
+// Read by the Firebase module on connect/reconnect to decide whether this
+// device's local copy is newer than the cloud's — and if so, push it up
+// instead of letting an older cloud copy silently clobber it.
+window.getLocalTrackerStateTs = _localTrackerStateTs;
+
 // Called by the Firebase module when this device first connects to a group
-// that has no cloud Tracker state yet — this device's current local state
-// becomes the shared starting point for every other device that connects.
-window.getTrackerStateForCloudSeed = function(){ return S; };
+// that has no cloud Tracker state yet (or when this device's local copy
+// turns out to be newer than the cloud's) — this device's current state
+// becomes the shared version every other device converges on.
+// playerPhotos/customPalettes/playerIcons are deliberately left out: they're
+// per-device cosmetic choices, not the shared win-rate/deck data, and
+// photos in particular are base64 strings that can push a document over
+// Firestore's 1MiB limit and make every push silently fail from then on.
+// Round-tripping through JSON also drops any stray `undefined` values,
+// which Firestore's SDK otherwise rejects the entire write for.
+window.getTrackerStateForCloudSeed = function(){
+  const {playerPhotos, customPalettes, playerIcons, ...shared} = S;
+  return JSON.parse(JSON.stringify(shared));
+};
 
 // Called by the Firebase module whenever a newer Tracker state arrives from
 // Firestore (another device made a change, or this device just connected
 // and pulled down the group's existing shared state). Applying it only
 // touches localStorage + in-memory S — it deliberately does NOT go through
 // save(), so receiving an update never re-triggers a push and can't loop.
+// Merges the incoming shared fields onto this device's own existing
+// cosmetic fields (photos/palettes/icons aren't part of what's synced, so
+// a wholesale S = migrateState(remoteState) would otherwise wipe them).
 let _lastAppliedTrackerUpdatedAt=0;
 window.onCodexTrackerStateChange=function(remoteState, updatedAt){
   if(updatedAt && updatedAt<=_lastAppliedTrackerUpdatedAt) return; // stale/out-of-order, ignore
   _lastAppliedTrackerUpdatedAt=updatedAt||Date.now();
-  S=migrateState(remoteState);
+  const keepPhotos=S.playerPhotos, keepPalettes=S.customPalettes, keepIcons=S.playerIcons;
+  S=migrateState({...remoteState, playerPhotos:keepPhotos, customPalettes:keepPalettes, playerIcons:keepIcons});
   try{localStorage.setItem(CFG.storageKey,JSON.stringify(S));}catch(_){}
+  try{localStorage.setItem(CFG.storageKey+'__ts', String(_lastAppliedTrackerUpdatedAt));}catch(_){}
   if(typeof render==='function') render();
   if(typeof reconcileLocalDecksWithCodex==='function') reconcileLocalDecksWithCodex();
   if(typeof syncDeckStatsToFirestore==='function') syncDeckStatsToFirestore(S.players);
@@ -5742,11 +5770,24 @@ function epRemoveCancel(){
           return;
         }
         const data = snap.data();
-        if(data && data.updatedAt === _lastPushedTrackerAt) return; // our own write echoing back, already applied
+        const cloudTs = (data && typeof data.updatedAt === 'number') ? data.updatedAt : 0;
+        if(cloudTs === _lastPushedTrackerAt) return; // our own write echoing back, already applied
         window.CodexSync.lastTrackerSyncAt = Date.now();
         window.CodexSync.lastTrackerSyncError = null;
-        if(data && typeof window.onCodexTrackerStateChange === 'function'){
-          window.onCodexTrackerStateChange(data.state, data.updatedAt);
+        const localTs = (typeof window.getLocalTrackerStateTs === 'function') ? window.getLocalTrackerStateTs() : 0;
+        if(cloudTs > localTs){
+          if(data && typeof window.onCodexTrackerStateChange === 'function'){
+            window.onCodexTrackerStateChange(data.state, cloudTs);
+          }
+        }else if(localTs > cloudTs){
+          // This device's local copy is newer — e.g. it made edits just
+          // before reconnecting, or while offline. Don't clobber it with
+          // the older cloud copy; push it up instead so the cloud (and
+          // every other device) catches up to it. This is exactly the case
+          // that used to silently erase fresh local changes on reconnect.
+          if(typeof window.getTrackerStateForCloudSeed === 'function'){
+            pushTrackerStateNow(window.getTrackerStateForCloudSeed());
+          }
         }
         notify();
       }, (err)=>{
@@ -5833,7 +5874,15 @@ function epRemoveCancel(){
     scheduleTrackerStatePush(stateObj){
       if(!trackerStateRef) return; // not connected — no-op, localStorage-only behavior unchanged
       clearTimeout(_trackerPushTimer);
-      _trackerPushTimer = setTimeout(()=>{ pushTrackerStateNow(stateObj); }, 500);
+      _trackerPushTimer = setTimeout(()=>{
+        // Always re-sanitize at push time (strip cosmetic fields + any
+        // stray `undefined`s) rather than trusting whatever was handed in
+        // — this is the one place a bad payload would actually hit
+        // Firestore and silently fail every write from then on.
+        const payload = (typeof window.getTrackerStateForCloudSeed === 'function')
+          ? window.getTrackerStateForCloudSeed() : stateObj;
+        pushTrackerStateNow(payload);
+      }, 500);
     },
     decksForPlayer(name){
       return this.decksByOwner[(name || '').trim().toLowerCase()] || [];
