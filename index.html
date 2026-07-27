@@ -5575,6 +5575,7 @@ function epRemoveCancel(){
 
   let groupDecksCol = null;
   let unsubscribeDecks = null;
+  let unsubscribeMembers = null;
   let currentGroupId = null;
   let myUid = null;
   let isLeaderFlag = false;
@@ -5597,6 +5598,7 @@ function epRemoveCancel(){
 
   function stopSyncing(){
     if(unsubscribeDecks){ unsubscribeDecks(); unsubscribeDecks = null; }
+    if(unsubscribeMembers){ unsubscribeMembers(); unsubscribeMembers = null; }
     groupDecksCol = null;
     currentGroupId = null;
     myUid = null;
@@ -5648,8 +5650,12 @@ function epRemoveCancel(){
         const groupSnap = await getDoc(doc(db, 'groups', groupId));
         isLeaderFlag = !!(groupSnap.exists() && groupSnap.data().leaderUid === uid);
       }catch(e){ isLeaderFlag = false; }
-      try{
-        const membersSnap = await getDocs(collection(db, 'groups', groupId, 'members'));
+      // Live, not a one-time fetch — a member added to the group *after*
+      // this Tracker already signed in (e.g. Mom just got invited) used to
+      // never show up here until the next full sign-in, which looked
+      // exactly like a name-matching problem ("mom" vs "Mom") when it was
+      // really just a stale, never-refreshed member list.
+      unsubscribeMembers = onSnapshot(collection(db, 'groups', groupId, 'members'), (membersSnap)=>{
         const map = {};
         membersSnap.forEach(m=>{
           const data = m.data();
@@ -5657,7 +5663,10 @@ function epRemoveCancel(){
           if(key) map[key] = { uid: data.uid, displayName: data.displayName };
         });
         membersByLowerName = map;
-      }catch(e){ membersByLowerName = {}; }
+        notify();
+      }, (err)=>{
+        console.error('Deck Codex member list sync error', err);
+      });
 
       unsubscribeDecks = onSnapshot(groupDecksCol, (decksSnap)=>{
         const byOwner = {};
